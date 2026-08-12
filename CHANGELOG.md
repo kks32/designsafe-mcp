@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- demo/DS_MCP_Walkthrough.ipynb: executed walkthrough of the four pillars (judgment, knowledge, safety, ground truth) with measured eval results, for sharing with the DesignSafe team.
 - Skills served as MCP prompts: dapi's skills/ playbooks resolve like
   its docs (local checkout or live fetch) and register as spec-standard
   prompts, so any MCP client gets them; scientific playbooks can live

@@ -7,6 +7,7 @@ exposes; nothing here touches dapi directly.
 """
 
 import json
+import os
 import sys
 import tempfile
 from pathlib import Path
@@ -14,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from designsafe_mcp import tools  # noqa: E402
 
-ALLOCATION = "DS-Portal-SPARC2026"
+ALLOCATION = os.environ.get("DAPI_ALLOCATION", "YOUR-ALLOCATION")
 
 
 def say(step, payload=None):
