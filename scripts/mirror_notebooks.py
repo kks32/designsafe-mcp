@@ -9,7 +9,7 @@ import os
 from dapi import DSClient
 
 BASE = "Jupyter Notebooks for Civil Engineering Courses/University_of_Washington"
-DEST = os.path.join(os.path.dirname(__file__), "..", "community_data",
+DEST = os.path.join(os.path.dirname(__file__), "..", "notebooks",
                     "University_of_Washington")
 CAP = 50 * 1024 * 1024
 

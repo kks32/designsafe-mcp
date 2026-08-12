@@ -1,7 +1,7 @@
 __pycache__/
 *.egg-info/
 .venv/
-community_data/
+notebooks/
 demo/manifest-*.json
 .venv/
 evals/results/

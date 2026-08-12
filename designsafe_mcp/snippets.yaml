@@ -85,9 +85,9 @@ snippets:
 candidates:
   - id: quofem-bayesian-calibration-uw
     title: Bayesian calibration of a liquefaction model through quoFEM (UW)
-    source: community_data/University_of_Washington/quoFEM-Example1-TAPISV3/BayesianCalibration/quoFEM-Bayesian-dapi.ipynb
+    source: notebooks/University_of_Washington/quoFEM-Example1-TAPISV3/BayesianCalibration/quoFEM-Bayesian-dapi.ipynb
     note: the OpenSees-calibration vertical; papers beside it in the folder
   - id: laterally-loaded-pile-uw
-    source: community_data/University_of_Washington/LateralLoadPile
+    source: notebooks/University_of_Washington/LateralLoadPile
   - id: freefield-effective-uw
-    source: community_data/University_of_Washington/freeFieldEffectiveJupyter
+    source: notebooks/University_of_Washington/freeFieldEffectiveJupyter

@@ -14,7 +14,7 @@ from typing import Any
 
 ROOT = Path(__file__).parent.parent
 SOURCES = [
-    ROOT / "community_data",                      # UW community notebooks and models
+    ROOT / "notebooks",                      # UW community notebooks and models
     ROOT.parent / "dapi" / "examples",            # our executed, tested examples
     ROOT.parent / "dapi" / "docs",                # dapi user guide (API reference)
     ROOT.parent / "workflows" / "guide",          # ds-workflows book: concepts

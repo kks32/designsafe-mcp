@@ -3,7 +3,7 @@
 Content is transcribed from the model's own manual, not from a language
 model's recall, and every entry cites its source pages. PM4Sand comes
 from Boulanger & Ziotopoulou (2023), Report UCD/CGM-23/01 (v3.3), which
-ships in community_data/references/ and is indexed for passage search.
+ships in notebooks/references/ and is indexed for passage search.
 The parameter-to-response sensitivity map is what lets an agent answer
 "which parameters do I calibrate against which data" before it plans a
 quoFEM run.
@@ -15,7 +15,7 @@ _PM4SAND: dict[str, Any] = {
     "model": "PM4Sand",
     "version": "3.3",
     "reference": "Boulanger & Ziotopoulou (2023), UCD/CGM-23/01, "
-    "community_data/references/PM4Sand_v3.3_CGM-23-01.pdf",
+    "notebooks/references/PM4Sand_v3.3_CGM-23-01.pdf",
     "opensees_material": "nDMaterial PM4Sand",
     "primary_parameters": [
         {
@@ -79,7 +79,7 @@ _PM4SAND: dict[str, Any] = {
         "what": "Bayesian calibration of (Dr, G0, hpo) against Ottawa "
         "F-65 cyclic DSS data, QoIs = cycles to liquefaction at CSR "
         "0.10-0.20, TMCMC via quoFEM",
-        "source": "community_data/University_of_Washington/"
+        "source": "notebooks/University_of_Washington/"
         "quoFEM-Example1-TAPISV3/BayesianCalibration/",
         "snippet_candidate": "quofem-bayesian-calibration-uw",
     },

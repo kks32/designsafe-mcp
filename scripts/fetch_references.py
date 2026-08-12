@@ -1,6 +1,6 @@
 """Fetch the reference documents the knowledge layer cites.
 
-community_data/ is gitignored, so these downloads make the corpus
+notebooks/ is gitignored, so these downloads make the corpus
 reproducible on a fresh clone. Run once, then `reindex` so the PDFs
 join the passage search.
 """
@@ -17,7 +17,7 @@ REFERENCES = {
 
 
 def main() -> None:
-    dest = Path(__file__).parent.parent / "community_data" / "references"
+    dest = Path(__file__).parent.parent / "notebooks" / "references"
     dest.mkdir(parents=True, exist_ok=True)
     for name, url in REFERENCES.items():
         target = dest / name
