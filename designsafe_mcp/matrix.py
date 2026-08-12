@@ -12,9 +12,9 @@ against the same sources.
   resource, so a host can show the human the same table the agent used.
 """
 
-from typing import Any, Dict, List
+from typing import Any
 
-VARIANTS: List[Dict[str, Any]] = [
+VARIANTS: list[dict[str, Any]] = [
     {"variant": "OpenSeesPy (JupyterHub)", "app_id": None,
      "when": "Python model, small enough for an interactive session",
      "notes": "no job at all; move to python-s3 when it outgrows the VM"},
@@ -39,7 +39,7 @@ VARIANTS: List[Dict[str, Any]] = [
 ]
 
 # Cell verdicts, from the slide legend.
-_LEGEND: Dict[str, str] = {
+_LEGEND: dict[str, str] = {
     "run-serial": "run the sequential application interactively (small jobs)",
     "run-mpi": "run the parallel application interactively using MPI (small jobs)",
     "run-mpi-large": "run the parallel application interactively using MPI (large jobs)",
@@ -52,7 +52,7 @@ _LEGEND: Dict[str, str] = {
 }
 
 # Columns: sequential OpenSees, OpenSeesSP, OpenSeesMP, OpenSeesPy.
-PLATFORM_MATRIX: List[Dict[str, Any]] = [
+PLATFORM_MATRIX: list[dict[str, Any]] = [
     {"scope": "small", "platform": "Interactive VM", "interface": "Linux terminal",
      "sequential": "run-serial", "sp": "run-mpi", "mp": "run-mpi", "openseespy": "run-mpi"},
     {"scope": "small", "platform": "Interactive VM", "interface": "Jupyter notebook",
@@ -75,7 +75,7 @@ PLATFORM_MATRIX: List[Dict[str, Any]] = [
      "sequential": "inefficient", "sp": "submit-launcher", "mp": "submit-launcher", "openseespy": "submit-launcher"},
 ]
 
-_NOTES: List[str] = [
+_NOTES: list[str] = [
     "The Interactive VM, OpenSees-EXPRESS, and JupyterHub each run on a dedicated shared-resource VM; no allocation is needed there.",
     "HPC submissions through Tapis apps (opensees-s3, opensees-mp-s3, python-s3) need a TACC allocation and archive to Stampede3.",
     "From the JupyterHub notebook, dapi is the submission path: the notebook stays the record while jobs run on HPC.",
@@ -83,7 +83,7 @@ _NOTES: List[str] = [
 ]
 
 
-def opensees_matrix() -> Dict[str, Any]:
+def opensees_matrix() -> dict[str, Any]:
     """Which OpenSees to use when: the decision matrix from the training deck.
 
     Returns the variant table (variant -> app_id -> when), the full

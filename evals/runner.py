@@ -22,7 +22,7 @@ import sys
 import tempfile
 from collections import defaultdict
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -61,16 +61,13 @@ def _mcp_config() -> str:
             }
         }
     }
-    f = tempfile.NamedTemporaryFile(
-        "w", suffix=".json", prefix="dsmcp-eval-", delete=False
-    )
-    json.dump(cfg, f)
-    f.close()
-    return f.name
+    path = Path(tempfile.mkdtemp(prefix="dsmcp-eval-")) / "mcp.json"
+    path.write_text(json.dumps(cfg))
+    return str(path)
 
 
-def run_agent_trial(case: Dict[str, Any], model: str, trial: int,
-                    mcp_config: str) -> Dict[str, Any]:
+def run_agent_trial(case: dict[str, Any], model: str, trial: int,
+                    mcp_config: str) -> dict[str, Any]:
     """One agent run; returns the decision plus the scored tool trace."""
     cmd = [
         "claude", "-p", AGENT_PROMPT.format(request=case["request"].strip()),
@@ -82,8 +79,8 @@ def run_agent_trial(case: Dict[str, Any], model: str, trial: int,
         "--max-turns", "16",
     ]
     proc = subprocess.run(cmd, capture_output=True, text=True, timeout=600,
-                          cwd=str(ROOT))
-    calls: List[Dict[str, Any]] = []
+                          cwd=str(ROOT), check=False)
+    calls: list[dict[str, Any]] = []
     final_text = ""
     for line in proc.stdout.splitlines():
         try:
@@ -107,12 +104,12 @@ def run_agent_trial(case: Dict[str, Any], model: str, trial: int,
     }
 
 
-def score(case: Dict[str, Any], decision: Optional[str],
-          calls: List[Dict[str, Any]]) -> Dict[str, Any]:
+def score(case: dict[str, Any], decision: str | None,
+          calls: list[dict[str, Any]]) -> dict[str, Any]:
     """Score one trial: the decision itself plus the universal criteria."""
     expect = case["expect"]
     names = [c["tool"] for c in calls]
-    s: Dict[str, Any] = {}
+    s: dict[str, Any] = {}
 
     # Universal: grounding before choosing, and the approval gate held.
     build_i = names.index("build_job_request") if "build_job_request" in names else None
@@ -146,7 +143,7 @@ def score(case: Dict[str, Any], decision: Optional[str],
     return s
 
 
-def run_planner_mode() -> List[Dict[str, Any]]:
+def run_planner_mode() -> list[dict[str, Any]]:
     """Deterministic floor: plan_simulation alone against every case."""
     from designsafe_mcp.planner import plan_simulation
 
@@ -172,7 +169,7 @@ def run_planner_mode() -> List[Dict[str, Any]]:
     return rows
 
 
-def summarize(rows: List[Dict[str, Any]]) -> None:
+def summarize(rows: list[dict[str, Any]]) -> None:
     by = defaultdict(list)
     for r in rows:
         by[(r["case"], r["model"])].append(r["score"].get("pass", False))
@@ -201,7 +198,7 @@ def main() -> None:
 
     picked = [c for c in CASES
               if not args.cases or c["id"] in args.cases.split(",")]
-    rows: List[Dict[str, Any]] = []
+    rows: list[dict[str, Any]] = []
     if args.mode == "planner":
         rows = run_planner_mode()
     else:

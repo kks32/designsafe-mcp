@@ -9,7 +9,7 @@ the matrix does, so the same facts always produce the same plan.
 """
 
 import re
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 from .tools import search_snippets
 
@@ -20,14 +20,14 @@ _SEQUENCE = [
 ]
 
 
-def _infer(request: str) -> Dict[str, Any]:
+def _infer(request: str) -> dict[str, Any]:
     """Conservative fact extraction from the request text.
 
     Only unambiguous signals fill a fact; everything else stays None and
     comes back as an open question.
     """
     r = request.lower()
-    facts: Dict[str, Any] = {
+    facts: dict[str, Any] = {
         "model_language": None, "parallelism": None, "n_cases": None,
         "uq_or_calibration": None, "has_allocation": None, "pipeline": None,
     }
@@ -61,13 +61,13 @@ def _infer(request: str) -> Dict[str, Any]:
 
 def plan_simulation(
     request: str,
-    model_language: Optional[str] = None,
-    parallelism: Optional[str] = None,
-    n_cases: Optional[int] = None,
-    uq_or_calibration: Optional[bool] = None,
-    has_allocation: Optional[bool] = None,
-    pipeline: Optional[bool] = None,
-) -> Dict[str, Any]:
+    model_language: str | None = None,
+    parallelism: str | None = None,
+    n_cases: int | None = None,
+    uq_or_calibration: bool | None = None,
+    has_allocation: bool | None = None,
+    pipeline: bool | None = None,
+) -> dict[str, Any]:
     """Plan an OpenSees/quoFEM simulation from the decision matrix.
 
     Pass the facts you know; anything left None is inferred from the
@@ -91,8 +91,8 @@ def plan_simulation(
         else inferred["has_allocation"],
         "pipeline": pipeline if pipeline is not None else inferred["pipeline"],
     }
-    open_questions: List[str] = []
-    path: List[str] = []
+    open_questions: list[str] = []
+    path: list[str] = []
 
     # Fork 1: UQ wraps everything else; quoFEM drives the model as its solver.
     if facts["uq_or_calibration"]:
@@ -162,10 +162,10 @@ def plan_simulation(
 
 
 def _plan(variant: str, app_id: str, snippet_query: str,
-          facts: Dict[str, Any], path: List[str],
-          open_questions: List[str]) -> Dict[str, Any]:
+          facts: dict[str, Any], path: list[str],
+          open_questions: list[str]) -> dict[str, Any]:
     snippets = search_snippets(snippet_query, app_id=app_id) or search_snippets(snippet_query)
-    plan: Dict[str, Any] = {
+    plan: dict[str, Any] = {
         "decision": {"variant": variant, "app_id": app_id},
         "facts": facts,
         "matrix_path": path,

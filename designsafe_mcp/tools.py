@@ -11,7 +11,7 @@ import json
 import os
 import time
 from pathlib import Path
-from typing import Any, Dict, List, Optional
+from typing import Any
 
 import yaml
 
@@ -28,7 +28,7 @@ def _mock() -> bool:
     return os.environ.get("DESIGNSAFE_MCP_MOCK") == "1"
 
 
-_MOCK_APPS: Dict[str, Dict[str, Any]] = {
+_MOCK_APPS: dict[str, dict[str, Any]] = {
     "python-s3": {"queue": "skx-dev", "nodeCount": 1, "coresPerNode": 48, "maxMinutes": 30},
     "opensees-express": {"queue": None, "nodeCount": 1, "coresPerNode": 1, "maxMinutes": 120},
     "opensees-s3": {"queue": "skx", "nodeCount": 1, "coresPerNode": 48, "maxMinutes": 120},
@@ -50,7 +50,7 @@ def _client():
     return _ds
 
 
-def search_snippets(query: str, app_id: Optional[str] = None) -> List[Dict[str, Any]]:
+def search_snippets(query: str, app_id: str | None = None) -> list[dict[str, Any]]:
     """Find tested, version-pinned workflow snippets matching a query.
 
     Snippets are executed, self-checking notebooks with pinned app and
@@ -69,7 +69,7 @@ def search_snippets(query: str, app_id: Optional[str] = None) -> List[Dict[str, 
     return [s for _, s in sorted(hits, key=lambda x: -x[0])]
 
 
-def describe_app(app_id: str) -> Dict[str, Any]:
+def describe_app(app_id: str) -> dict[str, Any]:
     """The app's real interface from Tapis: inputs, parameters, defaults."""
     if _mock():
         if app_id not in _MOCK_APPS:
@@ -119,17 +119,17 @@ def build_job_request(
     cores_per_node: int = 1,
     max_minutes: int = 30,
     queue: str = "skx-dev",
-    extra_env_vars: Optional[List[Dict[str, str]]] = None,
-    extra_app_args: Optional[List[Dict[str, str]]] = None,
-    job_name: Optional[str] = None,
-) -> Dict[str, Any]:
+    extra_env_vars: list[dict[str, str]] | None = None,
+    extra_app_args: list[dict[str, str]] | None = None,
+    job_name: str | None = None,
+) -> dict[str, Any]:
     """Build a complete Tapis job request from the app definition.
 
     Mirrors ds.jobs.generate; returns the dict for inspection. Nothing
     is submitted.
     """
     if _mock():
-        job: Dict[str, Any] = {
+        job: dict[str, Any] = {
             "name": job_name or f"{app_id}-run",
             "appId": app_id, "appVersion": "mock",
             "execSystemLogicalQueue": queue,
@@ -147,7 +147,7 @@ def build_job_request(
         }
         return job
     ds = _client()
-    kwargs: Dict[str, Any] = {}
+    kwargs: dict[str, Any] = {}
     if extra_env_vars:
         kwargs["extra_env_vars"] = extra_env_vars
     if extra_app_args:
@@ -168,7 +168,7 @@ def build_job_request(
     return job
 
 
-def validate_job(job: Dict[str, Any]) -> Dict[str, Any]:
+def validate_job(job: dict[str, Any]) -> dict[str, Any]:
     """Schema and sanity checks plus input existence, before any SU is spent."""
     issues = []
     for field in ("appId", "name", "fileInputs", "parameterSet"):
@@ -181,7 +181,7 @@ def validate_job(job: Dict[str, Any]) -> Dict[str, Any]:
             if src.startswith("tapis://"):
                 try:
                     ds.files.list(src)
-                except Exception as e:
+                except Exception as e:  # noqa: BLE001 - any Tapis error means unreachable
                     issues.append(f"input '{fi.get('name')}' unreachable: {str(e)[:80]}")
     minutes = job.get("maxMinutes", 0)
     if not 0 < minutes <= 2880:
@@ -189,7 +189,7 @@ def validate_job(job: Dict[str, Any]) -> Dict[str, Any]:
     return {"ok": not issues, "issues": issues}
 
 
-def estimate_cost(job: Dict[str, Any]) -> Dict[str, Any]:
+def estimate_cost(job: dict[str, Any]) -> dict[str, Any]:
     """Estimated SU cost: nodes x hours, per the DesignSafe job-resources guidance."""
     nodes = job.get("nodeCount", 1)
     hours = job.get("maxMinutes", 60) / 60
@@ -200,7 +200,7 @@ def estimate_cost(job: Dict[str, Any]) -> Dict[str, Any]:
     }
 
 
-def approve_submission(job: Dict[str, Any]) -> str:
+def approve_submission(job: dict[str, Any]) -> str:
     """Record human approval for exactly this job request; returns the token
     submit_job requires. The calling harness must show the trust summary
     (snippet, versions, cost, outputs) to a human before calling this."""
@@ -211,7 +211,7 @@ def approve_submission(job: Dict[str, Any]) -> str:
     return token
 
 
-def submit_job(job: Dict[str, Any], approval_token: str) -> Dict[str, Any]:
+def submit_job(job: dict[str, Any], approval_token: str) -> dict[str, Any]:
     """Submit a validated job. Refuses without the approval token minted
     by approve_submission for this exact request."""
     token = hashlib.sha256(
@@ -230,7 +230,7 @@ def submit_job(job: Dict[str, Any], approval_token: str) -> Dict[str, Any]:
     return {"submitted": True, "uuid": submitted.uuid}
 
 
-def job_status(uuid: str) -> Dict[str, Any]:
+def job_status(uuid: str) -> dict[str, Any]:
     """Current Tapis status for a submitted job."""
     if _mock():
         return {"uuid": uuid, "status": "FINISHED", "message": "mock run"}
@@ -239,7 +239,7 @@ def job_status(uuid: str) -> Dict[str, Any]:
     return {"uuid": uuid, "status": job.status, "message": job.last_message}
 
 
-def get_results(uuid: str, path: str = "") -> Dict[str, Any]:
+def get_results(uuid: str, path: str = "") -> dict[str, Any]:
     """List the job archive, or return a small text file's content."""
     if _mock():
         if path:
@@ -259,8 +259,8 @@ def get_results(uuid: str, path: str = "") -> Dict[str, Any]:
 
 
 def build_workflow_preview(
-    name: str, tasks: List[Dict[str, Any]]
-) -> Dict[str, Any]:
+    name: str, tasks: list[dict[str, Any]]
+) -> dict[str, Any]:
     """Compile a DAG of job requests without running it.
 
     tasks: [{"task_id", "job", "depends_on": [...],
@@ -295,11 +295,11 @@ def build_workflow_preview(
 
 def write_manifest(
     request: str,
-    snippet_ids: List[str],
-    job: Dict[str, Any],
+    snippet_ids: list[str],
+    job: dict[str, Any],
     uuid: str,
     out_path: str,
-    estimated_su: Optional[float] = None,
+    estimated_su: float | None = None,
 ) -> str:
     """Emit the provenance manifest that makes the run reproducible."""
     import dapi

@@ -10,7 +10,7 @@ import math
 import re
 from collections import Counter
 from pathlib import Path
-from typing import Any, Dict, List
+from typing import Any
 
 ROOT = Path(__file__).parent.parent
 SOURCES = [
@@ -24,10 +24,10 @@ _CACHE = ROOT / ".index_cache.json"
 _WORD = re.compile(r"[a-zA-Z][a-zA-Z0-9_-]{2,}")
 
 
-def _passages_from_notebook(path: Path) -> List[str]:
+def _passages_from_notebook(path: Path) -> list[str]:
     try:
         nb = json.loads(path.read_text(errors="ignore"))
-    except Exception:
+    except (OSError, json.JSONDecodeError, UnicodeDecodeError):
         return []
     out = []
     for c in nb.get("cells", []):
@@ -39,7 +39,7 @@ def _passages_from_notebook(path: Path) -> List[str]:
     return out
 
 
-def _build() -> List[Dict[str, Any]]:
+def _build() -> list[dict[str, Any]]:
     docs = []
     for base in SOURCES:
         if not base.exists():
@@ -54,20 +54,20 @@ def _build() -> List[Dict[str, Any]]:
             elif p.suffix in (".tcl", ".py", ".md", ".json") and p.is_file():
                 try:
                     head = p.read_text(errors="ignore")[:600]
-                except Exception:
+                except OSError:  # unreadable file in the mirror; skip it
                     continue
                 docs.append({"source": rel, "cell": 0, "text": head})
     _CACHE.write_text(json.dumps(docs))
     return docs
 
 
-def _load() -> List[Dict[str, Any]]:
+def _load() -> list[dict[str, Any]]:
     if _CACHE.exists():
         return json.loads(_CACHE.read_text())
     return _build()
 
 
-def search_community(query: str, limit: int = 8) -> List[Dict[str, Any]]:
+def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
     """Search every local notebook, model, and script for aligned passages.
 
     Returns the matching text itself with its source path, so the caller
@@ -78,7 +78,7 @@ def search_community(query: str, limit: int = 8) -> List[Dict[str, Any]]:
     df: Counter = Counter()
     tokenized = []
     for d in docs:
-        toks = set(w.lower() for w in _WORD.findall(d["text"]))
+        toks = {w.lower() for w in _WORD.findall(d["text"])}
         tokenized.append(toks)
         df.update(toks)
     q = [w.lower() for w in _WORD.findall(query)]
@@ -94,6 +94,6 @@ def search_community(query: str, limit: int = 8) -> List[Dict[str, Any]]:
     ]
 
 
-def reindex() -> Dict[str, int]:
+def reindex() -> dict[str, int]:
     """Rebuild the index after mirroring new community data."""
     return {"documents": len(_build())}
