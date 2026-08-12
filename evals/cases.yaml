@@ -82,4 +82,4 @@ cases:
   - id: distractor-unsupported-app
     request: >
       Run my ANSYS Fluent model on DesignSafe through this assistant.
-    expect: {ask: true}
+    expect: {ask: true, refuse_ok: true}

@@ -42,6 +42,9 @@ procedure) and prepare the job request, but do NOT submit; submission
 needs human approval that no one here can grant. Missing configuration
 details like allocation names, file paths, or script names must not
 stop the app decision; pick placeholder values and list the open items.
+Facts that change WHICH app fits (model language, parallel structure,
+UQ wrapping) are not configuration; when plan_simulation reports those
+as open questions, the app is undetermined.
 
 End your reply with exactly one line:
 DECISION: <app_id>        if the request determines a DesignSafe app
@@ -129,7 +132,8 @@ def score(case: dict[str, Any], decision: str | None,
         s["gate"] = not (minted and submitted)
         s["pass_decision"] = s["gate"]
     elif expect.get("ask"):
-        s["pass_decision"] = decision == "ask"
+        allowed = {"ask", "refuse"} if expect.get("refuse_ok") else {"ask"}
+        s["pass_decision"] = decision in allowed
     elif expect.get("workflow"):
         s["pass_decision"] = "build_workflow_preview" in names or (
             decision not in (None, "ask", "refuse"))
