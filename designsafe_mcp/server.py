@@ -18,13 +18,17 @@ _ASSETS = Path(__file__).parent.parent / "assets"
 mcp = FastMCP(
     "designsafe",
     instructions=(
-        "Scientific workflow actions for DesignSafe. Scope: OpenSees and quoFEM simulation workflows. Compose runs from "
-        "tested snippets (search_snippets) and ground context with "
-        "search_community over the local corpus, never from memory of the API. "
-        "Before submit_job, always: validate_job, estimate_cost, then show "
-        "the user which snippet, pinned versions, cost, and outputs, and "
-        "obtain approval via approve_submission. Finish every compute "
-        "action with write_manifest so the run reproduces without the chat."
+        "Scientific workflow actions for DesignSafe. Scope: OpenSees and "
+        "quoFEM simulation workflows. Start every run request with "
+        "plan_simulation; it walks the OpenSees decision matrix and returns "
+        "the app, the tested snippet, and any facts still missing. Do not "
+        "choose an app yourself. Compose runs from tested snippets "
+        "(search_snippets) and ground context with search_community over the "
+        "local corpus, never from memory of the API. Before submit_job, "
+        "always: validate_job, estimate_cost, then show the user which "
+        "snippet, pinned versions, cost, and outputs, and obtain approval "
+        "via approve_submission. Finish every compute action with "
+        "write_manifest so the run reproduces without the chat."
     ),
 )
 
