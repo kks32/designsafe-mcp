@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Knowledge extracted from code into designsafe_mcp/knowledge/ YAML
+  (decision matrix, capabilities, calibration methods, PM4Sand,
+  API-surface definitions incl. what current-dapi vs old-dapi means);
+  Python modules are loaders, domain experts edit data.
+- write_manifest refuses unreproducible provenance: the job must be a
+  complete request and the uuid must belong to a job this server
+  submitted; junk manifests from eval trials removed and untracked.
 - demo/DS_MCP_Walkthrough.ipynb: executed walkthrough of the four pillars (judgment, knowledge, safety, ground truth) with measured eval results, for sharing with the DesignSafe team.
 - Skills served as MCP prompts: dapi's skills/ playbooks resolve like
   its docs (local checkout or live fetch) and register as spec-standard

@@ -40,6 +40,9 @@ _MOCK_APPS: dict[str, dict[str, Any]] = {
 # an agent cannot invent it, so a human (or the calling harness) must gate it.
 _APPROVALS: set = set()
 
+# Manifests may only reference jobs this server actually submitted.
+_SUBMITTED: set = set()
+
 
 def _client():
     global _ds
@@ -224,9 +227,12 @@ def submit_job(job: dict[str, Any], approval_token: str) -> dict[str, Any]:
             "call approve_submission after human review",
         }
     if _mock():
-        return {"submitted": True, "uuid": f"mock-{token}", "mock": True}
+        uuid = f"mock-{token}"
+        _SUBMITTED.add(uuid)
+        return {"submitted": True, "uuid": uuid, "mock": True}
     ds = _client()
     submitted = ds.jobs.submit(job)
+    _SUBMITTED.add(submitted.uuid)
     return {"submitted": True, "uuid": submitted.uuid}
 
 
@@ -300,8 +306,28 @@ def write_manifest(
     uuid: str,
     out_path: str,
     estimated_su: float | None = None,
-) -> str:
-    """Emit the provenance manifest that makes the run reproducible."""
+) -> str | dict[str, Any]:
+    """Emit the provenance manifest that makes the run reproducible.
+
+    Refuses incomplete provenance: the job must be a fully built request
+    (app, name, resources, inputs) and the uuid must belong to a job
+    this server submitted. A manifest that cannot reproduce the run is
+    worse than none.
+    """
+    missing = [f for f in ("appId", "name", "nodeCount", "maxMinutes")
+               if not job.get(f)]
+    if not job.get("fileInputs") or not all(
+            fi.get("sourceUrl") for fi in job.get("fileInputs", [])):
+        missing.append("fileInputs with sourceUrl")
+    if missing:
+        return {"error": "refusing to write an unreproducible manifest; "
+                f"job request is missing {missing}. Build the job with "
+                "build_job_request and submit it first."}
+    if uuid not in _SUBMITTED:
+        return {"error": f"uuid '{uuid}' is not a job this server "
+                "submitted; a manifest records a real run, not an "
+                "intention. Submit (after approval) and pass the "
+                "returned uuid."}
     import dapi
 
     manifest = {

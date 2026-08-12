@@ -1,0 +1,40 @@
+# What counts as current, old, and raw API usage in notebooks. This is
+# the definition the corpus audit and the stale-passage warnings apply;
+# audit.py only loads it. Update when dapi's surface changes.
+
+surfaces:
+  - status: current-dapi
+    meaning: the DSClient surface of dapi 0.6+, the only orchestration
+      style agents may learn from
+    markers:
+      - 'ds\.jobs\.generate'
+      - 'ds\.jobs\.parametric_sweep'
+      - 'dapi\.workflows'
+      - 'from dapi import DSClient'
+
+  - status: old-dapi
+    meaning: the pre-DSClient module functions of dapi 0.3 and earlier
+      (the AgavePy / Tapis v2 era); syntax no longer exists
+    markers:
+      - 'dapi\.auth\.init'
+      - 'generate_job_info'
+      - 'dapi\.jobs\.get_status'
+      - 'from agavepy'
+      - 'dapi\.jobs\.submit_job'
+
+  - status: raw-tapisv3
+    meaning: tapipy driven directly, bypassing dapi; works but teaches
+      none of dapi's guardrails, so not snippet material
+    markers:
+      - 'from tapipy'
+      - 'Tapis\('
+      - 't\.jobs\.submitJob'
+      - 'getClient'
+
+# A notebook matching none of the above and containing no submission
+# calls is classified local-only (post-processing, teaching material).
+submission_markers:
+  - 'submitJob'
+  - 'jobs\.submit'
+  - 'parametric_sweep'
+  - 'pipeline'

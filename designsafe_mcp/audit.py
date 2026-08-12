@@ -1,14 +1,19 @@
 """Notebook API-currency classification.
 
-The corpus teaches agents whatever API surface it retrieves, so every
-indexed notebook carries its class and search results flag stale ones.
+What counts as current, old, or raw API usage is defined in
+knowledge/api_surfaces.yaml, per surface with markers and meaning; the
+corpus index and NOTEBOOKS.md apply it. The corpus teaches agents
+whatever it retrieves, so stale surfaces are flagged at search time.
 """
 
 import json
 import re
 from pathlib import Path
 
+from .knowledge import load
+
 CURRENT = ("current-dapi", "local-only")
+
 
 def code_of(nb_path: Path) -> str:
     try:
@@ -21,20 +26,10 @@ def code_of(nb_path: Path) -> str:
 
 
 def classify(code: str) -> str:
-    current = re.search(r"ds\.jobs\.generate|ds\.jobs\.parametric_sweep|"
-                        r"dapi\.workflows|from dapi import DSClient", code)
-    old = re.search(r"dapi\.auth\.init|generate_job_info|dapi\.jobs\.get_status|"
-                    r"from agavepy|dapi\.jobs\.submit_job", code)
-    raw = re.search(r"from tapipy|Tapis\(|t\.jobs\.submitJob|getClient", code)
-    submits = re.search(r"submitJob|jobs\.submit|parametric_sweep|pipeline", code)
-    if current:
-        return "current-dapi"
-    if old:
-        return "old-dapi"
-    if raw:
-        return "raw-tapisv3"
-    if not submits:
+    spec = load("api_surfaces")
+    for surface in spec["surfaces"]:
+        if any(re.search(m, code) for m in surface["markers"]):
+            return surface["status"]
+    if not any(re.search(m, code) for m in spec["submission_markers"]):
         return "local-only"
     return "unclassified"
-
-

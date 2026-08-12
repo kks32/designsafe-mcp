@@ -1,0 +1,43 @@
+# Calibration-stage methods runnable on DesignSafe. Domain content;
+# methods.py holds only the decision logic.
+options:
+- method: global-sensitivity
+  what: Sobol indices over the parameter space; screening, not fitting. Run first
+    when more parameters are uncertain than data can constrain.
+  engine: quoFEM (SimCenterUQ/Dakota) on simcenter-uq-stampede3
+  returns: first-order and total Sobol indices per QoI
+  status: tested
+  snippet: quofem-sensitivity-v1
+- method: bayesian-calibration
+  what: Posterior distribution on parameters given observations, via Transitional
+    MCMC. The choice when the answer must carry uncertainty into a downstream
+    prediction.
+  engine: quoFEM (UCSD_UQ TMCMC) on simcenter-uq-stampede3
+  returns: posterior samples per parameter, ready for forward propagation
+  cost_note: particles x TMCMC stages model runs (the UW example uses 100 particles);
+    the model must run in seconds to minutes
+  status: candidate (UW notebook mirrored, not yet executed by the corpus harness)
+  snippet: quofem-bayesian-calibration-uw
+- method: deterministic-calibration
+  what: Point estimate by nonlinear least squares (Dakota NL2SOL). Cheapest; right
+    when a single best-fit parameter set suffices and residuals are well-behaved.
+  engine: quoFEM (Dakota) on simcenter-uq-stampede3
+  returns: best-fit parameter vector and residuals
+  status: available in quoFEM, no local tested example yet
+  snippet: null
+- method: forward-propagation
+  what: Push parameter distributions (prior or posterior) through the model. The
+    validation step after calibration and the bridge to system-level prediction.
+  engine: quoFEM on simcenter-uq-stampede3, or a dapi/PyLauncher sweep when the
+    forward model is not quoFEM-wrapped
+  returns: QoI distributions / prediction intervals
+  status: tested (quoFEM forward example runs via dapi; sweeps are the resonance
+    and OpenSees pylauncher snippets)
+  snippet: resonance-pylauncher-sweep-v1
+- method: sweep-fit
+  what: Grid or LHS sweep on HPC plus a local fit. The fallback when quoFEM cannot
+    wrap the model or the QoI needs custom post-processing.
+  engine: python-s3 + PyLauncher via dapi; fit locally
+  returns: response surface and best-fit region; no formal posterior
+  status: tested (mechanism is the pylauncher sweep + ML-DAG snippets)
+  snippet: opensees-ml-dag-v1

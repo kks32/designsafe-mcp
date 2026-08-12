@@ -142,3 +142,18 @@ def test_calibration_options_state_status():
 
     for opt in calibration_options():
         assert opt["status"], opt["method"]
+
+
+def test_manifest_refuses_unreproducible_records(tmp_path):
+    incomplete = {"appId": "opensees-express", "fileInputs": []}
+    out = tools.write_manifest("req", ["s"], incomplete, "fake-uuid",
+                               str(tmp_path / "m.json"))
+    assert "error" in out and "unreproducible" in out["error"]
+    job = _mock_job()
+    out = tools.write_manifest("req", ["s"], job, "never-submitted",
+                               str(tmp_path / "m.json"))
+    assert "error" in out and "not a job this server submitted" in out["error"]
+    uuid = tools.submit_job(job, tools.approve_submission(job))["uuid"]
+    path = tools.write_manifest("req", ["s"], job, uuid,
+                                str(tmp_path / "m.json"))
+    assert isinstance(path, str) and (tmp_path / "m.json").exists()

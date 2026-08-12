@@ -10,3 +10,4 @@ corpus/
 .index_cache.json
 evals/RESULTS.md
 NOTEBOOKS.md
+manifests/
