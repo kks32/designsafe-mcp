@@ -2,6 +2,11 @@
 
 ## Unreleased
 
+- Skills served as MCP prompts: dapi's skills/ playbooks resolve like
+  its docs (local checkout or live fetch) and register as spec-standard
+  prompts, so any MCP client gets them; scientific playbooks can live
+  in this repo's skills/.
+
 - One source of ground truth: `bridge.py` derives read-only dapi tools
   (`list_my_jobs`, `list_queues`, `list_systems`,
   `list_app_templates`) from dapi's own signatures and docstrings at

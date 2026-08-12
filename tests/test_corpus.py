@@ -123,3 +123,12 @@ def test_quofem_docs_is_a_logical_source():
     status = corpus_status()
     quofem = next(s for s in status["sources"] if s["name"] == "quofem-docs")
     assert quofem["via"] in ("fetched-cache", "absent")
+
+
+def test_dapi_skills_serve_as_prompts():
+    from designsafe_mcp.skills import load_skills
+
+    skills = {s["name"]: s for s in load_skills()}
+    assert "submit-a-job" in skills
+    assert skills["submit-a-job"]["description"]
+    assert "ds.jobs.generate" in skills["submit-a-job"]["body"]

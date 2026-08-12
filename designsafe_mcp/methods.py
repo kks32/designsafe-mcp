@@ -163,11 +163,11 @@ def _assemble(request: str, methods: list[str], path: list[str],
             "engines": sorted({s["engine"].split(" on ")[0] for s in steps}),
         },
         "required_inputs": [
-            "which model: the main script (e.g. the .tcl driving the "
-            "element test or analysis)",
+            ("which model: the main script (e.g. the .tcl driving the "
+             "element test or analysis)"),
             "which parameters: names, and ranges or priors for each",
-            "what data: the observation/calibration file and which "
-            "response quantities (QoIs) it contains",
+            ("what data: the observation/calibration file and which "
+             "response quantities (QoIs) it contains"),
             "allocation to charge",
         ],
         "ask_the_user": "Relay any required_inputs the request did not "

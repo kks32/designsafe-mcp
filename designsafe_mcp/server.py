@@ -20,6 +20,7 @@ from . import (
     matrix,
     methods,
     planner,
+    skills,
     tools,
 )
 
@@ -76,6 +77,9 @@ for fn in (
     *bridge.DERIVED_TOOLS,
 ):
     mcp.tool()(fn)
+
+
+skills.register(mcp)
 
 
 @mcp.resource("designsafe://assets/opensees-decision-matrix.png", mime_type="image/png")

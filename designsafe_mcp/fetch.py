@@ -37,7 +37,7 @@ LOGICAL_SOURCES: list[dict[str, Any]] = [
                   ROOT.parent / "dapi" / "docs"],
         "remote": "github.com/DesignSafe-CI/dapi",
         "github": {"repo": "DesignSafe-CI/dapi", "branch": "main",
-                   "subdirs": ["examples", "docs"]},
+                   "subdirs": ["examples", "docs", "skills"]},
     },
     {
         "name": "ds-workflows",
