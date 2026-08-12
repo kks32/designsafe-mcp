@@ -25,7 +25,7 @@ def main() -> None:
             print(f"have {name}")
             continue
         print(f"fetching {name}")
-        urllib.request.urlretrieve(url, target)  # noqa: S310
+        urllib.request.urlretrieve(url, target)
     print(f"references in {dest}")
 
 
