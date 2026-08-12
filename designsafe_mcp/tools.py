@@ -18,6 +18,24 @@ import yaml
 _SNIPPETS = Path(__file__).parent / "snippets.yaml"
 _ds = None
 
+
+def _mock() -> bool:
+    """Eval/CI mode: DESIGNSAFE_MCP_MOCK=1 serves canned Tapis responses.
+
+    The approval gate stays real; only the network is faked, so agent
+    evaluations exercise the full tool sequence without spending SUs.
+    """
+    return os.environ.get("DESIGNSAFE_MCP_MOCK") == "1"
+
+
+_MOCK_APPS: Dict[str, Dict[str, Any]] = {
+    "python-s3": {"queue": "skx-dev", "nodeCount": 1, "coresPerNode": 48, "maxMinutes": 30},
+    "opensees-express": {"queue": None, "nodeCount": 1, "coresPerNode": 1, "maxMinutes": 120},
+    "opensees-s3": {"queue": "skx", "nodeCount": 1, "coresPerNode": 48, "maxMinutes": 120},
+    "opensees-mp-s3": {"queue": "skx", "nodeCount": 2, "coresPerNode": 48, "maxMinutes": 120},
+    "simcenter-uq-stampede3": {"queue": "skx", "nodeCount": 1, "coresPerNode": 48, "maxMinutes": 120},
+}
+
 # Submission requires this exact token, produced only by approve_submission();
 # an agent cannot invent it, so a human (or the calling harness) must gate it.
 _APPROVALS: set = set()
@@ -53,6 +71,13 @@ def search_snippets(query: str, app_id: Optional[str] = None) -> List[Dict[str, 
 
 def describe_app(app_id: str) -> Dict[str, Any]:
     """The app's real interface from Tapis: inputs, parameters, defaults."""
+    if _mock():
+        if app_id not in _MOCK_APPS:
+            return {"error": f"unknown app '{app_id}'", "known": sorted(_MOCK_APPS)}
+        d = _MOCK_APPS[app_id]
+        return {"id": app_id, "version": "mock", "execSystemId": "stampede3",
+                "defaults": d,
+                "fileInputs": [{"name": "Input Directory", "inputMode": "REQUIRED"}]}
     ds = _client()
     app = ds.tapis.apps.getAppLatestVersion(appId=app_id)
     ja = app.jobAttributes
@@ -74,6 +99,9 @@ def describe_app(app_id: str) -> Dict[str, Any]:
 
 def stage_inputs(local_dir: str, app_id: str = "python-s3") -> str:
     """Upload a local folder once and return the tapis:// URI to run from."""
+    if _mock():
+        name = Path(local_dir).name or "inputs"
+        return f"tapis://designsafe.storage.default/mockuser/{name}"
     ds = _client()
     try:
         return ds.files.to_uri(local_dir)
@@ -100,6 +128,24 @@ def build_job_request(
     Mirrors ds.jobs.generate; returns the dict for inspection. Nothing
     is submitted.
     """
+    if _mock():
+        job: Dict[str, Any] = {
+            "name": job_name or f"{app_id}-run",
+            "appId": app_id, "appVersion": "mock",
+            "execSystemLogicalQueue": queue,
+            "nodeCount": node_count, "coresPerNode": cores_per_node,
+            "maxMinutes": max_minutes,
+            "fileInputs": [{"name": "Input Directory", "sourceUrl": input_dir_uri}],
+            "parameterSet": {
+                "appArgs": ([{"name": a["name"], "arg": a["arg"]}
+                             for a in extra_app_args] if extra_app_args else [])
+                + [{"name": "Main Script", "arg": script_filename}],
+                "envVariables": extra_env_vars or [],
+                "schedulerOptions": [{"name": "allocation",
+                                      "arg": f"-A {allocation}"}],
+            },
+        }
+        return job
     ds = _client()
     kwargs: Dict[str, Any] = {}
     if extra_env_vars:
@@ -128,14 +174,15 @@ def validate_job(job: Dict[str, Any]) -> Dict[str, Any]:
     for field in ("appId", "name", "fileInputs", "parameterSet"):
         if not job.get(field):
             issues.append(f"missing {field}")
-    ds = _client()
-    for fi in job.get("fileInputs", []):
-        src = fi.get("sourceUrl", "")
-        if src.startswith("tapis://"):
-            try:
-                ds.files.list(src)
-            except Exception as e:
-                issues.append(f"input '{fi.get('name')}' unreachable: {str(e)[:80]}")
+    if not _mock():
+        ds = _client()
+        for fi in job.get("fileInputs", []):
+            src = fi.get("sourceUrl", "")
+            if src.startswith("tapis://"):
+                try:
+                    ds.files.list(src)
+                except Exception as e:
+                    issues.append(f"input '{fi.get('name')}' unreachable: {str(e)[:80]}")
     minutes = job.get("maxMinutes", 0)
     if not 0 < minutes <= 2880:
         issues.append(f"maxMinutes {minutes} outside (0, 2880]")
@@ -176,12 +223,17 @@ def submit_job(job: Dict[str, Any], approval_token: str) -> Dict[str, Any]:
             "error": "approval token missing or does not match this job request; "
             "call approve_submission after human review",
         }
+    if _mock():
+        return {"submitted": True, "uuid": f"mock-{token}", "mock": True}
     ds = _client()
     submitted = ds.jobs.submit(job)
     return {"submitted": True, "uuid": submitted.uuid}
 
 
 def job_status(uuid: str) -> Dict[str, Any]:
+    """Current Tapis status for a submitted job."""
+    if _mock():
+        return {"uuid": uuid, "status": "FINISHED", "message": "mock run"}
     ds = _client()
     job = ds.jobs.job(uuid)
     return {"uuid": uuid, "status": job.status, "message": job.last_message}
@@ -189,6 +241,12 @@ def job_status(uuid: str) -> Dict[str, Any]:
 
 def get_results(uuid: str, path: str = "") -> Dict[str, Any]:
     """List the job archive, or return a small text file's content."""
+    if _mock():
+        if path:
+            return {"path": path, "content": "mock output"}
+        return {"archive_uri": f"tapis://designsafe.storage.default/mockuser/archive/{uuid}",
+                "items": [{"name": "results.out", "type": "file"},
+                          {"name": "tapisjob.out", "type": "file"}]}
     ds = _client()
     job = ds.jobs.job(uuid)
     if path:
@@ -211,7 +269,7 @@ def build_workflow_preview(
     """
     from dapi.workflows import JobTask, Workflow
 
-    ds = _client()
+    username = "mockuser" if _mock() else _client().tapis.username
     wf = Workflow(name)
     handles = {}
     for t in tasks:
@@ -225,7 +283,7 @@ def build_workflow_preview(
             JobTask(t["task_id"], job), depends_on=t.get("depends_on")
         )
     wf.validate()
-    compiled, archives = wf.compile(ds.tapis.username, run_id="preview")
+    compiled, archives = wf.compile(username, run_id="preview")
     return {
         "tasks": [
             {"id": c["id"], "depends_on": [d["id"] for d in c["depends_on"]]}

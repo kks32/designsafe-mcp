@@ -37,7 +37,7 @@ def _infer(request: str) -> Dict[str, Any]:
         facts["model_language"] = "tcl"
     if re.search(r"getpid|getnp|partition|subdomain|domain decomposition", r):
         facts["parallelism"] = "domain-decomposition"
-    elif re.search(r"parallel solver|single large (domain|model)|opensees ?sp\b", r):
+    elif re.search(r"parallel (?:equation )?solver|(?:single|one) (?:large )?domain|opensees ?sp\b", r):
         facts["parallelism"] = "single-domain-parallel-solver"
     elif re.search(r"sweep|parameter stud|motions|pushover curves|realizations|cases\b", r):
         facts["parallelism"] = "many-independent-cases"
@@ -50,7 +50,7 @@ def _infer(request: str) -> Dict[str, Any]:
             facts["parallelism"] = "many-independent-cases"
     if re.search(r"calibrat|bayesian|sensitivit|sobol|uncertainty|quofem", r):
         facts["uq_or_calibration"] = True
-    if re.search(r"no allocation|without an? allocation|don'?t have an? allocation", r):
+    if re.search(r"no (?:\w+ )?allocation|without an? allocation|don'?t have an? allocation", r):
         facts["has_allocation"] = False
     elif re.search(r"allocation|reservation|class", r):
         facts["has_allocation"] = True

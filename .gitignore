@@ -4,3 +4,4 @@ __pycache__/
 community_data/
 demo/manifest-*.json
 .venv/
+evals/results/
