@@ -109,7 +109,8 @@ def _load_credentials() -> None:
         for line in env.read_text().splitlines():
             if "=" in line and not line.lstrip().startswith("#"):
                 k, v = line.split("=", 1)
-                os.environ.setdefault(k.strip(), v.strip())
+                os.environ.setdefault(
+                    k.strip(), v.strip().strip('"').strip("'"))
 
 
 if __name__ == "__main__":
