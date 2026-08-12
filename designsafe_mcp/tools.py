@@ -122,6 +122,7 @@ def build_job_request(
     cores_per_node: int = 1,
     max_minutes: int = 30,
     queue: str = "skx-dev",
+    memory_mb: int | None = None,
     extra_env_vars: list[dict[str, str]] | None = None,
     extra_app_args: list[dict[str, str]] | None = None,
     job_name: str | None = None,
@@ -139,6 +140,7 @@ def build_job_request(
             "execSystemLogicalQueue": queue,
             "nodeCount": node_count, "coresPerNode": cores_per_node,
             "maxMinutes": max_minutes,
+            **({"memoryMB": memory_mb} if memory_mb else {}),
             "fileInputs": [{"name": "Input Directory", "sourceUrl": input_dir_uri}],
             "parameterSet": {
                 "appArgs": ([{"name": a["name"], "arg": a["arg"]}
@@ -153,6 +155,8 @@ def build_job_request(
         return job
     ds = _client()
     kwargs: dict[str, Any] = {}
+    if memory_mb:
+        kwargs["memory_mb"] = memory_mb
     if extra_env_vars:
         kwargs["extra_env_vars"] = extra_env_vars
     if extra_app_args:

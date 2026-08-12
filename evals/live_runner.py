@@ -47,7 +47,8 @@ CASES = {
     "quofem-sensitivity": {
         "app_id": "simcenter-uq-stampede3", "script": None,
         "input_dir": "../dapi/examples/quoFEM-sensitivity/DS_input",
-        "files": {}, "max_minutes": 60, "queue": "skx-dev",
+        "files": {}, "max_minutes": 30, "queue": "skx-dev",
+        "extra": "cores_per_node=48, memory_mb=128000,",
         "assert_file": "dakotaTab.out",
         "snippet": "quofem-sensitivity-v1",
     },
@@ -77,6 +78,7 @@ print(uri)"""),
         code(f"""job = tools.build_job_request(
     app_id={c['app_id']!r}, input_dir_uri=uri,
     script_filename={c['script']!r}, allocation={alloc!r},
+    {c.get('extra', '')}
     max_minutes={c['max_minutes']}, queue={c['queue']!r},
     job_name="mcp-live-eval-{case_id}")
 v = tools.validate_job(job); print(v); assert v["ok"], v
