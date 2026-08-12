@@ -1,10 +1,10 @@
-# What counts as current, old, and raw API usage in notebooks. This is
-# the definition the corpus audit and the stale-passage warnings apply;
-# audit.py only loads it. Update when dapi's surface changes.
+# One blessed API surface: the current dapi. A notebook either uses it,
+# or it is stale and must be modernized before it can seed a snippet;
+# we do not maintain a taxonomy of past eras. audit.py loads this.
 
 surfaces:
   - status: current-dapi
-    meaning: the DSClient surface of dapi 0.6+, the only orchestration
+    meaning: the current dapi DSClient surface, the only orchestration
       style agents may learn from
     markers:
       - 'ds\.jobs\.generate'
@@ -12,27 +12,23 @@ surfaces:
       - 'dapi\.workflows'
       - 'from dapi import DSClient'
 
-  - status: old-dapi
-    meaning: the pre-DSClient module functions of dapi 0.3 and earlier
-      (the AgavePy / Tapis v2 era); syntax no longer exists
+  - status: stale
+    meaning: anything else that submits work (retired dapi idioms or
+      raw tapipy); flagged in search, excluded from snippets, fixed by
+      rewriting against current dapi
     markers:
       - 'dapi\.auth\.init'
       - 'generate_job_info'
       - 'dapi\.jobs\.get_status'
       - 'from agavepy'
       - 'dapi\.jobs\.submit_job'
-
-  - status: raw-tapisv3
-    meaning: tapipy driven directly, bypassing dapi; works but teaches
-      none of dapi's guardrails, so not snippet material
-    markers:
       - 'from tapipy'
       - 'Tapis\('
       - 't\.jobs\.submitJob'
       - 'getClient'
 
-# A notebook matching none of the above and containing no submission
-# calls is classified local-only (post-processing, teaching material).
+# Matching none of the above and containing no submission calls means
+# local-only (post-processing, teaching material).
 submission_markers:
   - 'submitJob'
   - 'jobs\.submit'
