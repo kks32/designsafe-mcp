@@ -59,6 +59,22 @@ LOGICAL_SOURCES: list[dict[str, Any]] = [
                    "subdirs": ["docs/common/user_manual",
                                "docs/common/technical_manual"]},
     },
+    {
+        "name": "opensees-training",
+        "what": "OpenSees-on-DesignSafe training materials (Mazzoni)",
+        "local": [],
+        "remote": "github.com/DesignSafe-CI/training-OpenSees-on-DesignSafe",
+        "github": {"repo": "DesignSafe-CI/training-OpenSees-on-DesignSafe",
+                   "branch": "main", "subdirs": []},
+    },
+    {
+        "name": "quofem-examples",
+        "what": "quoFEM worked examples from the SimCenter repo",
+        "local": [],
+        "remote": "github.com/NHERI-SimCenter/quoFEM",
+        "github": {"repo": "NHERI-SimCenter/quoFEM", "branch": "master",
+                   "subdirs": ["Examples"]},
+    },
 ]
 
 _KEEP = (".ipynb", ".md", ".rst", ".py", ".tcl", ".json", ".pdf")

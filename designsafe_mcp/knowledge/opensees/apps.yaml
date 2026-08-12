@@ -1,0 +1,30 @@
+# App-specific operational rules learned from live runs and the tested
+# examples. These are the quirks that kill first submissions; encode
+# them here, never in an agent's memory.
+
+apps:
+  simcenter-uq-stampede3:
+    staging: prepare_inputs is mandatory (rewrites scInput.json paths
+      to the backend) and bundle=true zips tmp.SimCenter into one file,
+      which also speeds the MyData-to-scratch job-staging leg
+    script_filename: none; dapi wires scInput.json and driver
+    resources: whole-node requests only on skx-dev (cores_per_node 48,
+      memory_mb 128000); a 1-core request dies at sbatch with
+      ZipLauncher exit 1 during SUBMITTING_JOB
+    archives: outputs land inside results.zip (dakotaTab.out at
+      results/dakotaTab.out); loose-file assertions fail
+    verified_live: job 2026-08-12, Sobol over Dr/G0/hpo vs
+      cycles-to-liquefaction, Ottawa F-65 example
+
+  opensees-s3:
+    main_program: required appArg selecting OpenSees, OpenSeesSP, or
+      OpenSeesMP
+    archives: to Stampede3 $WORK, not MyData; search both when the
+      archive looks empty
+
+  opensees-express:
+    runs_on: dedicated VM; no queue, no allocation; serial Tcl only
+
+  python-s3:
+    verified_live: oscillator eval 2026-08-12, amplification 10.0;
+      1-core requests are fine here, unlike SimCenter apps
