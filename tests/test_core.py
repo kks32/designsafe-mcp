@@ -9,8 +9,8 @@ import pytest
 
 os.environ["DESIGNSAFE_MCP_MOCK"] = "1"
 
-from designsafe_mcp import matrix, tools  # noqa: E402
-from designsafe_mcp.planner import plan_simulation  # noqa: E402
+from designsafe_mcp import matrix, tools
+from designsafe_mcp.planner import plan_simulation
 
 
 def test_matrix_variants_map_to_known_apps():

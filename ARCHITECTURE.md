@@ -29,6 +29,31 @@ The substrate is canonical. dapi's lifecycle (`generate`, `submit`,
 `monitor`, `archive_uri`) is the only orchestration surface; when dapi
 lacks something the fix is a dapi change, never a shadow API here.
 
+## One source of ground truth
+
+The MCP never describes a fact that lives somewhere else; it
+introspects or fetches it, so there is nothing to keep in sync by
+hand. Each kind of knowledge has exactly one home.
+
+| Truth | Home | How the MCP gets it |
+|---|---|---|
+| dapi operations and their parameters | dapi's typed signatures and docstrings | `bridge.py` derives tool schemas by introspection at import time; a dapi release changes the schemas with zero edits here |
+| App inputs, defaults, queues | the live Tapis service | `describe_app` and `ds.jobs.generate` read them per call, never cached in code |
+| Documentation and examples | canonical GitHub remotes and CommunityData | live-fetched corpus, freshness-stamped, resolution visible in `corpus_status` |
+| Scientific judgment (decision matrices, capability scope, snippet admissions, material knowledge) | this repo | the only hand-maintained layer, and the MCP's actual value; guarded by corpus-consistency tests and page-cited sources |
+
+The safety spine (`build_job_request`, `submit_job`) must stay
+hand-written because the approval gate wraps it, so those two carry
+contract tests instead: `tests/test_bridge.py` asserts our parameters
+are a strict subset of dapi's and fails the suite the moment a dapi
+release renames anything. Drift is caught by CI, not by memory.
+
+Two corollaries. A dapi method with a `*args/**kwargs` passthrough
+signature cannot be exposed (there is no schema to derive); the fix is
+a typed signature upstream in dapi, never a hand-written description
+here. And bumping the pinned dapi version is a real event: run the
+suite and the planner-floor evals before trusting the new pin.
+
 ## Decisions live in tools, not in the model
 
 The failure mode that matters is a confidently wrong workflow burning

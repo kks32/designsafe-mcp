@@ -2,6 +2,14 @@
 
 ## Unreleased
 
+- One source of ground truth: `bridge.py` derives read-only dapi tools
+  (`list_my_jobs`, `list_queues`, `list_systems`,
+  `list_app_templates`) from dapi's own signatures and docstrings at
+  import time; contract tests in `tests/test_bridge.py` alarm on drift
+  for the hand-written safety-spine wrappers. ARCHITECTURE.md records
+  the doctrine: introspect or fetch every external fact, hand-maintain
+  only the scientific judgment layer.
+
 - Live-fetched grounding: logical sources (UW notebooks, dapi,
   ds-workflows, SimCenter quoFEM docs) resolve env override -> local
   checkout -> `corpus/` cache filled by `fetch_corpus()` from the
