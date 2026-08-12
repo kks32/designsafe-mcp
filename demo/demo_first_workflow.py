@@ -15,7 +15,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).parent.parent))
 from designsafe_mcp import tools  # noqa: E402
 
-ALLOCATION = os.environ.get("DAPI_ALLOCATION", "YOUR-ALLOCATION")
+ALLOCATION = os.environ.get("DAPI_ALLOCATION", "DS-Portal-SPARC2026")
 
 
 def say(step, payload=None):

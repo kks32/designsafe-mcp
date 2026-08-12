@@ -31,7 +31,7 @@ cases:
   - id: serial-tcl-classroom
     request: >
       Run my serial site-response Tcl model on Stampede3; the class has
-      a reservation and an active class allocation.
+      a reservation and the DS-Portal-SPARC2026 allocation.
     expect: {app_id: opensees-s3, main_program: OpenSees}
 
   - id: partitioned-multimotion
