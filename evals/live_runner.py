@@ -100,7 +100,20 @@ print("LIVE EVAL PASS")"""),
     return path
 
 
+def _load_credentials() -> None:
+    """Export dapi credentials to the kernel's environment. Values are
+    never printed or written; the executed notebook inherits them the
+    same way a JupyterHub session would."""
+    env = ROOT.parent / "dapi" / ".env"
+    if env.exists():
+        for line in env.read_text().splitlines():
+            if "=" in line and not line.lstrip().startswith("#"):
+                k, v = line.split("=", 1)
+                os.environ.setdefault(k.strip(), v.strip())
+
+
 if __name__ == "__main__":
+    _load_credentials()
     case = sys.argv[1] if len(sys.argv) > 1 else "oscillator"
     path = build(case)
     nb = nbf.read(path, as_version=4)
