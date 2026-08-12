@@ -8,3 +8,5 @@ evals/results/
 preview.html
 corpus/
 .index_cache.json
+evals/RESULTS.md
+NOTEBOOKS.md
