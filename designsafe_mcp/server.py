@@ -11,8 +11,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
-from . import (capabilities, fetch, index, materials, matrix, methods,
-               planner, tools)
+from . import capabilities, fetch, index, materials, matrix, methods, planner, tools
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 

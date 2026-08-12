@@ -83,7 +83,7 @@ def fetch_corpus(source: str = "") -> dict[str, Any]:
             continue
         url = (f"https://github.com/{gh['repo']}/archive/refs/heads/"
                f"{gh['branch']}.tar.gz")
-        with urllib.request.urlopen(url, timeout=120) as resp:  # noqa: S310
+        with urllib.request.urlopen(url, timeout=120) as resp:
             data = resp.read()
         dest = CACHE / spec["name"]
         kept = 0

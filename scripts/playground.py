@@ -16,7 +16,7 @@ from http.server import BaseHTTPRequestHandler, HTTPServer
 
 os.environ.setdefault("DESIGNSAFE_MCP_MOCK", "1")
 
-from designsafe_mcp.server import mcp  # noqa: E402
+from designsafe_mcp.server import mcp
 
 PORT = 8787
 
@@ -137,10 +137,10 @@ class Handler(BaseHTTPRequestHandler):
         self.end_headers()
         self.wfile.write(data)
 
-    def do_GET(self) -> None:  # noqa: N802 - stdlib API
+    def do_GET(self) -> None:
         self._send(_page())
 
-    def do_POST(self) -> None:  # noqa: N802 - stdlib API
+    def do_POST(self) -> None:
         if not self.path.startswith("/call/"):
             self._send("{}", "application/json")
             return

@@ -71,7 +71,7 @@ def _passages_from_pdf(path: Path) -> list[str]:
 def _build() -> dict[str, Any]:
     import time
 
-    docs = []
+    docs: list[dict[str, Any]] = []
     per_source: dict[str, Any] = {}
     for base in _sources():
         if not base.exists():
