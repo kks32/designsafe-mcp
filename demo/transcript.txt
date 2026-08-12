@@ -86,3 +86,36 @@ Job submitted successfully. UUID: df94cc0d-3918-4034-a19d-b73a3df59f2d-007
   status: ARCHIVING
   status: ARCHIVING
   status: ARCHIVING
+  status: FINISHED
+
+=== get_results(result.json) ===
+{
+  "amplification": 10.00000162793735
+}
+
+=== write_manifest ===
+{
+  "path": "/Users/krishna/dev/DesignSafe/Dapi-Tapis/designsafe-mcp/demo/manifest-oscillator.json"
+}
+
+=== build_workflow_preview (sweep -> train, nothing submitted) ===
+{
+  "tasks": [
+    {
+      "id": "sweep",
+      "depends_on": []
+    },
+    {
+      "id": "train",
+      "depends_on": [
+        "sweep"
+      ]
+    }
+  ],
+  "archives": {
+    "sweep": "tapis://designsafe.storage.default/kks32/dapi-workflows/mcp-demo/preview/sweep",
+    "train": "tapis://designsafe.storage.default/kks32/dapi-workflows/mcp-demo/preview/train"
+  }
+}
+
+DEMO COMPLETE
