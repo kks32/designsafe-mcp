@@ -11,7 +11,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP
 
-from . import index, matrix, tools
+from . import index, matrix, planner, tools
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 
@@ -29,6 +29,7 @@ mcp = FastMCP(
 )
 
 for fn in (
+    planner.plan_simulation,
     tools.search_snippets,
     index.search_community,
     index.reindex,
