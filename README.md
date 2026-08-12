@@ -1,10 +1,14 @@
 # designsafe-mcp
 
-An agent-first cyberinfrastructure layer for DesignSafe. The server exposes
+An agent-first cyberinfrastructure layer for DesignSafe, scoped to a
+bounded subset of the quoFEM pipeline for geotechnical earthquake
+engineering with OpenSees as the forward solver. The server exposes
 scientific actions, find a tested workflow, build and validate a job, price
 it, run it after human approval, and package the result with provenance,
 so an AI agent (or a researcher) composes reproducible computational science
-instead of driving low-level APIs.
+instead of driving low-level APIs. `supported_capabilities()` declares
+exactly what is supported, in which scientific domain, and how much of
+it is tested; requests outside that map are declined by design.
 
 dapi and Tapis remain the substrate; this layer translates research intent
 into trustworthy workflows. Orchestration comes from a tested snippet corpus

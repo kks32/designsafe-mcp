@@ -2,6 +2,27 @@
 
 ## Unreleased
 
+- Declared scope: this server is a bounded subset of the quoFEM
+  pipeline for geotechnical earthquake engineering, OpenSees as the
+  forward solver. `supported_capabilities()` maps three scientific
+  domains (site response and liquefaction; constitutive calibration
+  and UQ; parameter studies and pipelines) to engines, snippets, and
+  tested/candidate status, with an explicit out-of-scope list.
+- Notebook corpus renamed `community_data/` to `notebooks/`; API
+  currency audit (`scripts/audit_notebooks.py` -> NOTEBOOKS.md, 35
+  current-dapi / 14 stale in the UW mirror); search results now flag
+  stale-API passages so agents never copy old orchestration idioms.
+- Evals derived from the notebooks themselves
+  (`scripts/derive_cases.py` -> `evals/cases-notebooks.yaml`): each
+  tested notebook's intro prose becomes the request, the snippet
+  record the expectation. Planner gained a named-variant shortcut and
+  corpus-match reporting; sonnet passes 7/7 derived and 10/10 curated
+  cases after the change.
+- Corpus consistency tests: snippet sources exist, use current dapi,
+  reference their claimed app; capability map agrees with the corpus.
+- `scripts/preview_server.py` generates a self-contained capability
+  sheet (preview.html) from live server introspection.
+
 - Calibrate-stage layer: `describe_material` (PM4Sand parameter table,
   sensitivity map, and calibration sequence transcribed from the v3.3
   manual, UCD/CGM-23/01, with page citations), `calibration_options`
