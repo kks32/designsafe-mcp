@@ -47,6 +47,7 @@ for fn in (
     materials.describe_material,
     tools.search_snippets,
     index.search_community,
+    index.search_docs,
     index.corpus_status,
     index.reindex,
     fetch.fetch_corpus,

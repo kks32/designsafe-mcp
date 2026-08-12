@@ -2,6 +2,20 @@
 
 ## Unreleased
 
+- Live-fetched grounding: logical sources (UW notebooks, dapi,
+  ds-workflows, SimCenter quoFEM docs) resolve env override -> local
+  checkout -> `corpus/` cache filled by `fetch_corpus()` from the
+  canonical GitHub remotes; no sibling checkouts assumed. quoFEM docs
+  come from the SimCenter documentation monorepo (368 files, user and
+  technical manuals).
+- `search_docs`: documentation-only knowledge tool with a fixed
+  contract (passages with source and freshness stamp; grounding only);
+  local index backend now, DesignSafe Ask AI knowledge graph (Neo4j)
+  later behind the same tool.
+- `corpus_status`: how each source resolved (local / fetched-cache /
+  absent), passage counts, index build stamp; search hits carry the
+  stamp.
+
 - Declared scope: this server is a bounded subset of the quoFEM
   pipeline for geotechnical earthquake engineering, OpenSees as the
   forward solver. `supported_capabilities()` maps three scientific

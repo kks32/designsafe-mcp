@@ -58,6 +58,23 @@ returns passages with their source paths from the UW community-data
 mirror, the dapi examples, and the ds-workflows book, so the agent reads
 what the community actually wrote instead of guessing from titles.
 
+Grounding sources do not assume a machine with everything checked out.
+Each logical source (UW notebooks, dapi, the ds-workflows book, the
+SimCenter quoFEM documentation) resolves in order: environment
+override, local checkout, then a `corpus/` cache that `fetch_corpus`
+fills live from the canonical GitHub remote. `corpus_status` reports
+how every source resolved and when the index was built, so degraded
+grounding is visible rather than silent; the CommunityData mirror is
+the one credentialed fetch (Tapis auth) and stays a scripted step.
+
+`search_docs` is the knowledge component for documentation: the dapi
+user guide, the ds-workflows book, quoFEM's user and technical manuals,
+and the reference PDFs. Its contract is fixed (query in; passages with
+source and freshness stamp out; grounding only, never orchestration
+code). The backend today is the local index over live-fetched docs;
+the DesignSafe Ask AI knowledge graph (Neo4j) replaces that backend
+later without the tool surface changing.
+
 ## The safety spine
 
 Nothing reaches HPC on the model's say-so. The sequence is fixed.

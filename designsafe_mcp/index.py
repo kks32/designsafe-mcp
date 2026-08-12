@@ -93,7 +93,8 @@ def _build() -> dict[str, Any]:
                 for i, passage in enumerate(_passages_from_pdf(p)):
                     docs.append({"source": f"{rel}#page{i + 1}", "cell": i,
                                  "text": passage})
-            elif p.suffix in (".tcl", ".py", ".md", ".json") and p.is_file():
+            elif p.suffix in (".tcl", ".py", ".md", ".rst",
+                              ".json") and p.is_file():
                 try:
                     head = p.read_text(errors="ignore")[:600]
                 except OSError:  # unreadable file in the mirror; skip it
@@ -115,14 +116,43 @@ def _load() -> dict[str, Any]:
     return _build()
 
 
+# Passages from these path fragments are documentation rather than
+# community notebooks; search_docs filters on them. The backend is the
+# local TF-IDF index today and the DesignSafe Ask AI knowledge graph
+# (Neo4j) later; the tool contract does not change when it swaps.
+_DOC_MARKERS = ("dapi/docs", "workflows/guide", "workflows/advanced",
+                "ds-workflows", "quofem-docs", "notebooks/references")
+
+
+def search_docs(query: str, limit: int = 8) -> list[dict[str, Any]]:
+    """Search the documentation corpus: the dapi user guide, the
+    ds-workflows book, SimCenter quoFEM docs, and reference manuals.
+
+    Grounding only, never the source of orchestration code; snippets
+    remain the only source an agent may compose runs from. Results
+    carry source and index stamp. Backend today is a local index over
+    live-fetched docs; the Ask AI knowledge graph replaces it later
+    behind this same tool.
+    """
+    hits = _search(query, limit * 4)
+    docs = [h for h in hits
+            if any(m in h["source"] for m in _DOC_MARKERS)]
+    return docs[:limit]
+
+
 def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
     """Search every local notebook, model, and script for aligned passages.
 
     Returns the matching text itself with its source path and the
     index build stamp, so the caller can ground a workflow in what the
     community actually wrote and knows how fresh that knowledge is.
-    Call corpus_status() to see which sources the index covers.
+    Call corpus_status() to see which sources the index covers; use
+    search_docs for documentation-only search.
     """
+    return _search(query, limit)
+
+
+def _search(query: str, limit: int) -> list[dict[str, Any]]:
     payload = _load()
     docs = payload["docs"]
     built = payload.get("built", "unknown")

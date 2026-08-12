@@ -48,9 +48,20 @@ LOGICAL_SOURCES: list[dict[str, Any]] = [
         "github": {"repo": "DesignSafe-CI/ds-workflows", "branch": "main",
                    "subdirs": ["guide", "advanced"]},
     },
+    {
+        "name": "quofem-docs",
+        "what": "SimCenter quoFEM documentation source: UQ methods, "
+        "examples, verification (from the SimCenter docs monorepo)",
+        "local": [],
+        "remote": "github.com/NHERI-SimCenter/SimCenterDocumentation",
+        "github": {"repo": "NHERI-SimCenter/SimCenterDocumentation",
+                   "branch": "master",
+                   "subdirs": ["docs/common/user_manual",
+                               "docs/common/technical_manual"]},
+    },
 ]
 
-_KEEP = (".ipynb", ".md", ".py", ".tcl", ".json", ".pdf")
+_KEEP = (".ipynb", ".md", ".rst", ".py", ".tcl", ".json", ".pdf")
 
 
 def resolve_source(spec: dict[str, Any]) -> list[Path]:
@@ -92,7 +103,8 @@ def fetch_corpus(source: str = "") -> dict[str, Any]:
                 if not member.isfile() or not member.name.endswith(_KEEP):
                     continue
                 rel = Path(*Path(member.name).parts[1:])  # strip repo-branch/
-                if not any(str(rel).startswith(f"{s}/") for s in gh["subdirs"]):
+                if gh["subdirs"] and not any(
+                        str(rel).startswith(f"{s}/") for s in gh["subdirs"]):
                     continue
                 out = dest / rel
                 out.parent.mkdir(parents=True, exist_ok=True)
@@ -100,5 +112,9 @@ def fetch_corpus(source: str = "") -> dict[str, Any]:
                 if extracted:
                     out.write_bytes(extracted.read())
                     kept += 1
+        import time
+
+        (dest / ".fetched").write_text(
+            time.strftime("%Y-%m-%dT%H:%M:%S%z"))
         report[spec["name"]] = f"{kept} files -> {dest}"
     return report

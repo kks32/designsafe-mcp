@@ -101,7 +101,25 @@ def test_corpus_status_names_every_logical_source():
 
     status = corpus_status()
     names = {s["name"] for s in status["sources"]}
-    assert names == {"notebooks", "dapi", "ds-workflows"}
+    assert names == {"notebooks", "dapi", "ds-workflows", "quofem-docs"}
     assert status["total_documents"] > 1000
     for s in status["sources"]:
         assert s["via"] in ("local", "fetched-cache", "absent")
+
+
+def test_search_docs_returns_only_documentation_sources():
+    from designsafe_mcp.index import _DOC_MARKERS, search_docs
+
+    hits = search_docs("TMCMC Bayesian calibration quoFEM")
+    assert hits, "quoFEM docs should be fetched and indexed"
+    for h in hits:
+        assert any(m in h["source"] for m in _DOC_MARKERS), h["source"]
+        assert h["indexed"]
+
+
+def test_quofem_docs_is_a_logical_source():
+    from designsafe_mcp.index import corpus_status
+
+    status = corpus_status()
+    quofem = next(s for s in status["sources"] if s["name"] == "quofem-docs")
+    assert quofem["via"] in ("fetched-cache", "absent")
