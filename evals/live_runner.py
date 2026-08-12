@@ -39,6 +39,17 @@ CASES = {
         "queue": "skx-dev",
         "assert_re": r"AMPLIFICATION\s+(\d+\.\d+)",
         "assert_range": (9.0, 11.0),
+        "snippet": "oscillator-single-job-v1",
+    },
+    # quoFEM global sensitivity over the tested example's DS_input.
+    # SimCenter apps take no script_filename; stage_inputs bundles via
+    # dapi's prepare_inputs and generate wires scInput.json itself.
+    "quofem-sensitivity": {
+        "app_id": "simcenter-uq-stampede3", "script": None,
+        "input_dir": "../dapi/examples/quoFEM-sensitivity/DS_input",
+        "files": {}, "max_minutes": 60, "queue": "skx-dev",
+        "assert_file": "dakotaTab.out",
+        "snippet": "quofem-sensitivity-v1",
     },
 }
 
@@ -56,7 +67,9 @@ def build(case_id: str) -> Path:
 from pathlib import Path
 os.environ.pop("DESIGNSAFE_MCP_MOCK", None)   # LIVE
 from designsafe_mcp import tools
-work = Path({str(OUT / case_id)!r}); work.mkdir(parents=True, exist_ok=True)
+work = Path({str((ROOT / c["input_dir"]).resolve() if c.get("input_dir")
+              else OUT / case_id)!r})
+work.mkdir(parents=True, exist_ok=True)
 for name, body in {c['files']!r}.items():
     (work / name).write_text(body)
 uri = tools.stage_inputs(str(work), app_id={c['app_id']!r})
@@ -80,17 +93,21 @@ for _ in range(120):
     time.sleep(20)
 print(uuid, status)
 assert status == "FINISHED", status"""),
-        code(f"""listing = tools.get_results(uuid)
-print([i["name"] for i in listing["items"]])
+        code((f"""listing = tools.get_results(uuid)
+names = [i["name"] for i in listing["items"]]
+print(names)
 out_text = tools.get_results(uuid, "tapisjob.out")["content"]
 m = re.search(r"{c['assert_re']}", out_text)
 assert m, out_text[-800:]
 value = float(m.group(1))
 print("measured:", value)
-assert {c['assert_range'][0]} < value < {c['assert_range'][1]}
+assert {c['assert_range'][0]} < value < {c['assert_range'][1]}""" if c.get("assert_re") else f"""listing = tools.get_results(uuid)
+names = [i["name"] for i in listing["items"]]
+print(names)
+assert {c['assert_file']!r} in names, names""") + f"""
 manifest = tools.write_manifest(
-    "live eval {case_id}", ["oscillator-single-job-v1"], job, uuid,
-    str(work / "manifest.json"))
+    "live eval {case_id}", [{c.get('snippet', 'oscillator-single-job-v1')!r}],
+    job, uuid, str(Path({str(OUT / case_id)!r}) / "manifest.json"))
 print(manifest); assert isinstance(manifest, str)
 print("LIVE EVAL PASS")"""),
     ]

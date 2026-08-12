@@ -116,8 +116,8 @@ def stage_inputs(local_dir: str, app_id: str = "python-s3") -> str:
 def build_job_request(
     app_id: str,
     input_dir_uri: str,
-    script_filename: str,
     allocation: str,
+    script_filename: str | None = None,
     node_count: int = 1,
     cores_per_node: int = 1,
     max_minutes: int = 30,
@@ -129,7 +129,8 @@ def build_job_request(
     """Build a complete Tapis job request from the app definition.
 
     Mirrors ds.jobs.generate; returns the dict for inspection. Nothing
-    is submitted.
+    is submitted. SimCenter apps (quoFEM) take no script_filename; dapi
+    wires scInput.json and the driver automatically.
     """
     if _mock():
         job: dict[str, Any] = {
@@ -142,7 +143,8 @@ def build_job_request(
             "parameterSet": {
                 "appArgs": ([{"name": a["name"], "arg": a["arg"]}
                              for a in extra_app_args] if extra_app_args else [])
-                + [{"name": "Main Script", "arg": script_filename}],
+                + ([{"name": "Main Script", "arg": script_filename}]
+                   if script_filename else []),
                 "envVariables": extra_env_vars or [],
                 "schedulerOptions": [{"name": "allocation",
                                       "arg": f"-A {allocation}"}],

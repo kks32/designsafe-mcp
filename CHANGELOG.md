@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- Live eval tier: evals/live_runner.py generates notebooks that drive the real tools end to end on TACC (oscillator on python-s3, quoFEM sensitivity on simcenter-uq-stampede3); executed notebooks are the artifacts, gitignored. script_filename now optional, mirroring dapi, for SimCenter apps.
 - OpenSees domain package: matrix, planners, calibration methods, and material knowledge move under designsafe_mcp/opensees/ with knowledge/opensees/ data; the top level is generic substrate only, and a new domain gets a sibling package of the same shape.
 - Knowledge extracted from code into designsafe_mcp/knowledge/ YAML
   (decision matrix, capabilities, calibration methods, PM4Sand,
