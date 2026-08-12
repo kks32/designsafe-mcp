@@ -37,7 +37,7 @@ CASES = {
         "app_id": "python-s3", "script": "oscillator.py",
         "files": {"oscillator.py": OSC}, "max_minutes": 10,
         "queue": "skx-dev",
-        "assert_re": r"AMPLIFICATION\\s+(\\d+\\.\\d+)",
+        "assert_re": r"AMPLIFICATION\s+(\d+\.\d+)",
         "assert_range": (9.0, 11.0),
     },
 }
