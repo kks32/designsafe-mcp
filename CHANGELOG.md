@@ -18,6 +18,13 @@
   (per-user stdio now, shared streamable HTTP later), and the evaluation
   methodology.
 - mcp 2.0 SDK compatibility (MCPServer) with a fallback import for 1.x.
+- Headless test suite (15 tests: matrix invariants, planner forks, the
+  approval gate incl. token invalidation on job edits) plus ruff and
+  mypy clean.
+- evals/RESULTS.md tracking runs across harness iterations: run 1
+  22/60, run 2 43/60 after planner-first instructions, run 3 82/90
+  across haiku/sonnet/opus (24, 28, 30 of 30); the approval gate and
+  planner grounding held in every trial of the final run.
 
 ## 0.1.0 (2026-08-11)
 
