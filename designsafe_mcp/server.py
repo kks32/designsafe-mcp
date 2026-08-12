@@ -11,7 +11,7 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
-from . import index, matrix, planner, tools
+from . import index, materials, matrix, methods, planner, tools
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 
@@ -22,7 +22,10 @@ mcp = FastMCP(
         "quoFEM simulation workflows. Start every run request with "
         "plan_simulation; it walks the OpenSees decision matrix and returns "
         "the app, the tested snippet, and any facts still missing. Do not "
-        "choose an app yourself. Compose runs from tested snippets "
+        "choose an app yourself. For calibration or UQ studies start with "
+        "plan_calibration, and consult describe_material for the model's "
+        "parameters, sensitivities, and calibration sequence before "
+        "building inputs. Compose runs from tested snippets "
         "(search_snippets) and ground context with search_community over the "
         "local corpus, never from memory of the API. Before submit_job, "
         "always: validate_job, estimate_cost, then show the user which "
@@ -34,6 +37,9 @@ mcp = FastMCP(
 
 for fn in (
     planner.plan_simulation,
+    methods.plan_calibration,
+    methods.calibration_options,
+    materials.describe_material,
     tools.search_snippets,
     index.search_community,
     index.reindex,

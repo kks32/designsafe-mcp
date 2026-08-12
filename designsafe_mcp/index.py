@@ -39,6 +39,21 @@ def _passages_from_notebook(path: Path) -> list[str]:
     return out
 
 
+def _passages_from_pdf(path: Path) -> list[str]:
+    try:
+        from pypdf import PdfReader
+
+        reader = PdfReader(str(path))
+    except Exception:  # noqa: BLE001 - unreadable or pypdf absent; skip
+        return []
+    out = []
+    for page in reader.pages:
+        text = " ".join((page.extract_text() or "").split())
+        if len(text) > 200:
+            out.append(text[:1200])
+    return out
+
+
 def _build() -> list[dict[str, Any]]:
     docs = []
     for base in SOURCES:
@@ -51,6 +66,10 @@ def _build() -> list[dict[str, Any]]:
             if p.suffix == ".ipynb":
                 for i, passage in enumerate(_passages_from_notebook(p)):
                     docs.append({"source": rel, "cell": i, "text": passage})
+            elif p.suffix == ".pdf":
+                for i, passage in enumerate(_passages_from_pdf(p)):
+                    docs.append({"source": f"{rel}#page{i + 1}", "cell": i,
+                                 "text": passage})
             elif p.suffix in (".tcl", ".py", ".md", ".json") and p.is_file():
                 try:
                     head = p.read_text(errors="ignore")[:600]

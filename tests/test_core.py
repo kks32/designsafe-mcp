@@ -108,3 +108,37 @@ def test_workflow_preview_compiles_in_mock_mode():
     )
     ids = {t["id"] for t in preview["tasks"]}
     assert ids == {"first", "second"}
+
+
+def test_material_knowledge_cites_the_manual():
+    from designsafe_mcp.materials import describe_material
+
+    m = describe_material("PM4Sand")
+    assert [p["name"] for p in m["primary_parameters"]] == ["Dr", "G0", "hpo"]
+    assert all(p["source_pages"] for p in m["primary_parameters"])
+    assert "UCD/CGM-23/01" in m["reference"]
+    assert describe_material("unknownium")["error"]
+
+
+def test_calibration_planner_forks():
+    from designsafe_mcp.methods import plan_calibration
+
+    bayes = plan_calibration("x", n_uncertain_parameters=3,
+                             uncertainty_required=True, quofem_wrappable=True)
+    assert bayes["decision"]["pipeline"] == [
+        "bayesian-calibration", "forward-propagation"]
+    screened = plan_calibration("x", n_uncertain_parameters=12,
+                                uncertainty_required=True,
+                                quofem_wrappable=True)
+    assert screened["decision"]["pipeline"][0] == "global-sensitivity"
+    fallback = plan_calibration("x", quofem_wrappable=False)
+    assert fallback["decision"]["pipeline"] == ["sweep-fit"]
+    undecided = plan_calibration("calibrate something")
+    assert undecided["decision"] is None and undecided["open_questions"]
+
+
+def test_calibration_options_state_status():
+    from designsafe_mcp.methods import calibration_options
+
+    for opt in calibration_options():
+        assert opt["status"], opt["method"]

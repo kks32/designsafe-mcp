@@ -2,6 +2,16 @@
 
 ## Unreleased
 
+- Calibrate-stage layer: `describe_material` (PM4Sand parameter table,
+  sensitivity map, and calibration sequence transcribed from the v3.3
+  manual, UCD/CGM-23/01, with page citations), `calibration_options`
+  and `plan_calibration` (deterministic method matrix over quoFEM
+  sensitivity/Bayesian/deterministic/forward and the sweep-fit
+  fallback, each option carrying its tested/candidate status).
+- PDF passage indexing: the PM4Sand manual and the UW liquefaction
+  example/paper PDFs are searchable with page-level sources (index
+  grew 1387 to 1506 documents).
+
 - OpenSees decision matrix from the training deck as a typed tool
   (`opensees_matrix`), with the original slide and the resource-selection
   flowchart shipped as MCP image resources.
