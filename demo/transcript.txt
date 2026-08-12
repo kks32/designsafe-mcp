@@ -83,3 +83,6 @@ Job submitted successfully. UUID: df94cc0d-3918-4034-a19d-b73a3df59f2d-007
   status: QUEUED
   status: RUNNING
   status: RUNNING
+  status: ARCHIVING
+  status: ARCHIVING
+  status: ARCHIVING

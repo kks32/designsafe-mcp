@@ -6,13 +6,14 @@ Register in an MCP host (Claude Code/Desktop, jupyter-ai) as a stdio server.
 
 from mcp.server.fastmcp import FastMCP
 
-from . import tools
+from . import index, tools
 
 mcp = FastMCP(
     "designsafe",
     instructions=(
-        "Scientific workflow actions for DesignSafe. Compose runs from "
-        "tested snippets (search_snippets), never from memory of the API. "
+        "Scientific workflow actions for DesignSafe. Scope: OpenSees and quoFEM simulation workflows. Compose runs from "
+        "tested snippets (search_snippets) and ground context with "
+        "search_community over the local corpus, never from memory of the API. "
         "Before submit_job, always: validate_job, estimate_cost, then show "
         "the user which snippet, pinned versions, cost, and outputs, and "
         "obtain approval via approve_submission. Finish every compute "
@@ -22,6 +23,8 @@ mcp = FastMCP(
 
 for fn in (
     tools.search_snippets,
+    index.search_community,
+    index.reindex,
     tools.describe_app,
     tools.stage_inputs,
     tools.build_job_request,
