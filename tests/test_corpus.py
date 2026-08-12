@@ -60,3 +60,20 @@ def test_stale_notebooks_carry_warnings_in_search():
     stale_hits = [h for h in hits if "warning" in h]
     assert stale_hits, "expected at least one flagged stale passage"
     assert "stale API surface" in stale_hits[0]["warning"]
+
+
+def test_capability_snippets_exist_in_corpus():
+    from designsafe_mcp.capabilities import supported_capabilities
+
+    tested = {s["id"] for s in SNIPPETS["snippets"]}
+    candidates = {c["id"] for c in SNIPPETS.get("candidates", [])}
+    caps = supported_capabilities()
+    assert caps["out_of_scope"]
+    for domain in caps["domains"]:
+        for cap in domain["capabilities"]:
+            if cap["snippet"] is None:
+                continue
+            if cap["status"] == "tested":
+                assert cap["snippet"] in tested, cap["what"]
+            elif cap["status"] == "candidate":
+                assert cap["snippet"] in candidates, cap["what"]

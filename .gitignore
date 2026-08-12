@@ -5,3 +5,4 @@ notebooks/
 demo/manifest-*.json
 .venv/
 evals/results/
+preview.html

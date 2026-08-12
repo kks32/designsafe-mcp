@@ -26,7 +26,7 @@ def _intro(nb_path: Path) -> str:
         if cell.get("cell_type") != "markdown":
             continue
         text = "".join(cell.get("source", []))
-        text = re.sub(r"^#.*$", "", text, flags=re.M)          # headings
+        text = re.sub(r"^#.*$", "", text, flags=re.MULTILINE)          # headings
         text = re.sub(r"!\[[^\]]*\]\([^)]*\)", "", text)        # images
         text = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", text)    # links
         text = "\n".join(

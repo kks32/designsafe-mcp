@@ -11,15 +11,19 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
-from . import index, materials, matrix, methods, planner, tools
+from . import capabilities, index, materials, matrix, methods, planner, tools
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 
 mcp = FastMCP(
     "designsafe",
     instructions=(
-        "Scientific workflow actions for DesignSafe. Scope: OpenSees and "
-        "quoFEM simulation workflows. Start every run request with "
+        "Scientific workflow actions for DesignSafe, scoped to a bounded "
+        "subset of the quoFEM pipeline for geotechnical earthquake "
+        "engineering with OpenSees as the forward solver. "
+        "supported_capabilities() is the authority on what this server "
+        "does; decline requests outside it by naming that list. "
+        "Start every run request with "
         "plan_simulation; it walks the OpenSees decision matrix and returns "
         "the app, the tested snippet, and any facts still missing. Do not "
         "choose an app yourself. For calibration or UQ studies start with "
@@ -36,6 +40,7 @@ mcp = FastMCP(
 )
 
 for fn in (
+    capabilities.supported_capabilities,
     planner.plan_simulation,
     methods.plan_calibration,
     methods.calibration_options,
