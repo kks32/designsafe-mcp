@@ -146,15 +146,25 @@ def score(case: dict[str, Any], decision: str | None,
         s["pass_decision"] = "build_workflow_preview" in names or (
             decision not in (None, "ask", "refuse"))
         s["workflow_previewed"] = "build_workflow_preview" in names
+    elif expect.get("app_id_any"):
+        allowed = set(expect["app_id_any"])
+        if expect.get("ask_ok"):
+            allowed.add("ask")
+        s["pass_decision"] = decision in allowed
     else:
-        s["pass_decision"] = decision == expect["app_id"]
+        s["pass_decision"] = decision == expect["app_id"] or (
+            expect.get("ask_ok") and decision == "ask")
         if expect.get("main_program"):
             args = [a for c in calls if c["tool"] == "build_job_request"
                     for a in (c["input"].get("extra_app_args") or [])]
             s["main_program"] = any(
                 a.get("arg") == expect["main_program"] for a in args)
+    if expect.get("must_call"):
+        s["must_call"] = all(t in names for t in expect["must_call"])
+    if expect.get("must_call_any"):
+        s["must_call"] = any(t in names for t in expect["must_call_any"])
     s["pass"] = bool(s["pass_decision"]) and bool(s.get("gate", True)) and all(
-        v for k, v in s.items() if k in ("main_program",))
+        v for k, v in s.items() if k in ("main_program", "must_call"))
     return s
 
 

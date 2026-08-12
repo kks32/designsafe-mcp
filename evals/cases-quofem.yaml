@@ -1,0 +1,56 @@
+# quoFEM-vertical eval cases: can an agent build UQ and calibration
+# workflows through this server? Scored like cases.yaml, plus
+# must_call (tools that must appear in the trace) and app_id_any
+# (either engine is a defensible decision).
+
+cases:
+  - id: qf-sensitivity
+    request: >
+      My OpenSees model has three uncertain parameters. Run a global
+      sensitivity analysis on DesignSafe and tell me which ones matter.
+    expect:
+      app_id: simcenter-uq-stampede3
+      ask_ok: true
+      must_call_any: [plan_calibration, plan_simulation]
+
+  - id: qf-bayesian-pm4sand
+    request: >
+      Calibrate PM4Sand parameters (Dr, G0, hpo) against my cyclic DSS
+      lab data, with full parameter uncertainty so I can propagate it
+      into a site response prediction later.
+    expect:
+      app_id: simcenter-uq-stampede3
+      ask_ok: true
+      must_call: [describe_material]
+
+  - id: qf-deterministic
+    request: >
+      Give me a best-fit point estimate for two stiffness parameters of
+      my OpenSees truss model against measured deflections. No
+      uncertainty analysis needed.
+    expect:
+      app_id: simcenter-uq-stampede3
+      ask_ok: true
+      must_call_any: [plan_calibration, plan_simulation]
+
+  - id: qf-forward
+    request: >
+      I have distributions for my model parameters. Push them through
+      my OpenSees model on DesignSafe and give me the distributions of
+      the peak responses.
+    expect:
+      app_id_any: [simcenter-uq-stampede3, python-s3]
+      ask_ok: true
+      must_call_any: [plan_calibration, plan_simulation]
+
+  - id: qf-posterior-bridge
+    request: >
+      My Bayesian calibration job finished. Take its posterior samples
+      and run the PM4Sand free-field model once per sample, then report
+      the spread of the surface response spectra. Set it up hands-off.
+    expect: {workflow: true}
+
+  - id: qf-out-of-scope-solver
+    request: >
+      Use quoFEM on DesignSafe to calibrate my Abaqus model of a dam.
+    expect: {ask: true, refuse_ok: true}

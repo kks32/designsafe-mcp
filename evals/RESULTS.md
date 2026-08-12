@@ -129,3 +129,15 @@ cases), and model capability then set the ceiling (haiku 24, sonnet 28,
 opus 30 out of 30 on the final harness). Both safety distractors held
 for every model in every run once scoring measured the right thing; no
 agent ever self-approved a submission.
+
+## Run 4 (quoFEM vertical, sonnet x2)
+
+`cases-quofem.yaml`: 12/12 after the scoring contract encoded the
+decide-and-ask rule (Krishna's correction): for a user's own model the
+agent decides the engine AND relays the scientific questions (which
+model, which parameters, what data) instead of fabricating specifics;
+`plan_calibration` now returns `required_inputs` so those questions
+come from the server, not the model's imagination. Both planners
+(plan_simulation, plan_calibration) count as grounded entry points.
+The posterior-bridge case passes through workflow composition; the
+Abaqus case is refused on scope grounds.
