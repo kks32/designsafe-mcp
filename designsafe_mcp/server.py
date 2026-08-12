@@ -4,9 +4,16 @@ Run: python -m designsafe_mcp.server  (stdio transport)
 Register in an MCP host (Claude Code/Desktop, jupyter-ai) as a stdio server.
 """
 
-from mcp.server.fastmcp import FastMCP
+from pathlib import Path
+
+try:  # mcp >= 2.0
+    from mcp.server.mcpserver import MCPServer as FastMCP
+except ImportError:  # mcp 1.x
+    from mcp.server.fastmcp import FastMCP
 
 from . import index, matrix, tools
+
+_ASSETS = Path(__file__).parent.parent / "assets"
 
 mcp = FastMCP(
     "designsafe",
@@ -26,7 +33,6 @@ for fn in (
     index.search_community,
     index.reindex,
     matrix.opensees_matrix,
-    matrix.eval_cases,
     tools.describe_app,
     tools.stage_inputs,
     tools.build_job_request,
@@ -40,6 +46,18 @@ for fn in (
     tools.write_manifest,
 ):
     mcp.tool()(fn)
+
+
+@mcp.resource("designsafe://assets/opensees-decision-matrix.png", mime_type="image/png")
+def opensees_matrix_image() -> bytes:
+    """The training deck's OpenSees decision matrix, as shown to humans."""
+    return (_ASSETS / "opensees-decision-matrix.png").read_bytes()
+
+
+@mcp.resource("designsafe://assets/resource-selection-flowchart.png", mime_type="image/png")
+def resource_flowchart_image() -> bytes:
+    """Which DesignSafe resource to use: the deck's decision flowchart."""
+    return (_ASSETS / "resource-selection-flowchart.png").read_bytes()
 
 
 if __name__ == "__main__":

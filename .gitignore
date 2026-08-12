@@ -3,3 +3,4 @@ __pycache__/
 .venv/
 community_data/
 demo/manifest-*.json
+.venv/
