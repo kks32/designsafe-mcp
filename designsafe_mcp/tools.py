@@ -271,7 +271,7 @@ def build_workflow_preview(
 
     username = "mockuser" if _mock() else _client().tapis.username
     wf = Workflow(name)
-    handles = {}
+    handles: dict[str, Any] = {}
     for t in tasks:
         job = dict(t["job"])
         ref = t.get("input_from")

@@ -9,7 +9,7 @@ from pathlib import Path
 try:  # mcp >= 2.0
     from mcp.server.mcpserver import MCPServer as FastMCP
 except ImportError:  # mcp 1.x
-    from mcp.server.fastmcp import FastMCP
+    from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
 from . import index, matrix, planner, tools
 
