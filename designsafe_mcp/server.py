@@ -11,7 +11,8 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
-from . import capabilities, index, materials, matrix, methods, planner, tools
+from . import (capabilities, fetch, index, materials, matrix, methods,
+               planner, tools)
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 
@@ -47,7 +48,9 @@ for fn in (
     materials.describe_material,
     tools.search_snippets,
     index.search_community,
+    index.corpus_status,
     index.reindex,
+    fetch.fetch_corpus,
     matrix.opensees_matrix,
     tools.describe_app,
     tools.stage_inputs,

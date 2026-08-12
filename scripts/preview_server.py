@@ -23,6 +23,7 @@ LAYERS = {
                            "plan_calibration", "calibration_options",
                            "opensees_matrix", "describe_material"],
     "Grounding and retrieval": ["search_snippets", "search_community",
+                                "corpus_status", "fetch_corpus",
                                 "reindex", "describe_app"],
     "Job lifecycle and safety spine": ["stage_inputs", "build_job_request",
                                        "validate_job", "estimate_cost",

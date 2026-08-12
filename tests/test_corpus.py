@@ -77,3 +77,31 @@ def test_capability_snippets_exist_in_corpus():
                 assert cap["snippet"] in tested, cap["what"]
             elif cap["status"] == "candidate":
                 assert cap["snippet"] in candidates, cap["what"]
+
+
+def test_sources_resolve_local_first_then_fetched_cache(tmp_path):
+    from designsafe_mcp import fetch
+
+    spec = {"name": "x", "local": [tmp_path / "missing"], "github": None}
+    assert fetch.resolve_source(spec) == []
+    cached = fetch.CACHE / "x"
+    cached.mkdir(parents=True, exist_ok=True)
+    try:
+        assert fetch.resolve_source(spec) == [cached]
+        present = tmp_path / "present"
+        present.mkdir()
+        spec["local"] = [present]
+        assert fetch.resolve_source(spec) == [present]
+    finally:
+        cached.rmdir()
+
+
+def test_corpus_status_names_every_logical_source():
+    from designsafe_mcp.index import corpus_status
+
+    status = corpus_status()
+    names = {s["name"] for s in status["sources"]}
+    assert names == {"notebooks", "dapi", "ds-workflows"}
+    assert status["total_documents"] > 1000
+    for s in status["sources"]:
+        assert s["via"] in ("local", "fetched-cache", "absent")

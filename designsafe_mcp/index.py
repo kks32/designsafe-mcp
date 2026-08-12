@@ -13,13 +13,27 @@ from pathlib import Path
 from typing import Any
 
 ROOT = Path(__file__).parent.parent
-SOURCES = [
-    ROOT / "notebooks",                      # UW community notebooks and models
-    ROOT.parent / "dapi" / "examples",            # our executed, tested examples
-    ROOT.parent / "dapi" / "docs",                # dapi user guide (API reference)
-    ROOT.parent / "workflows" / "guide",          # ds-workflows book: concepts
-    ROOT.parent / "workflows" / "advanced",       # ds-workflows book: apps, DAGs, containers
-]
+
+# Grounding sources resolve through fetch.LOGICAL_SOURCES: local
+# checkouts when present, the live-fetched corpus/ cache otherwise
+# (fetch_corpus pulls the public GitHub sources). An environment
+# override (DESIGNSAFE_MCP_SOURCES, colon-separated paths) replaces
+# the whole list. corpus_status() reports what actually resolved, so
+# a degraded index is visible instead of silent.
+def _sources() -> list[Path]:
+    import os
+
+    env = os.environ.get("DESIGNSAFE_MCP_SOURCES")
+    if env:
+        return [Path(p).expanduser() for p in env.split(":") if p]
+    from .fetch import LOGICAL_SOURCES, resolve_source
+
+    paths: list[Path] = []
+    for spec in LOGICAL_SOURCES:
+        paths.extend(resolve_source(spec))
+    return paths
+
+
 _CACHE = ROOT / ".index_cache.json"
 _WORD = re.compile(r"[a-zA-Z][a-zA-Z0-9_-]{2,}")
 
@@ -54,11 +68,16 @@ def _passages_from_pdf(path: Path) -> list[str]:
     return out
 
 
-def _build() -> list[dict[str, Any]]:
+def _build() -> dict[str, Any]:
+    import time
+
     docs = []
-    for base in SOURCES:
+    per_source: dict[str, Any] = {}
+    for base in _sources():
         if not base.exists():
+            per_source[str(base)] = {"present": False, "documents": 0}
             continue
+        start = len(docs)
         for p in base.rglob("*"):
             if "__pycache__" in str(p) or "_staged" in str(p):
                 continue
@@ -80,23 +99,33 @@ def _build() -> list[dict[str, Any]]:
                 except OSError:  # unreadable file in the mirror; skip it
                     continue
                 docs.append({"source": rel, "cell": 0, "text": head})
-    _CACHE.write_text(json.dumps(docs))
-    return docs
+        per_source[str(base)] = {"present": True,
+                                 "documents": len(docs) - start}
+    payload = {"built": time.strftime("%Y-%m-%dT%H:%M:%S%z"),
+               "sources": per_source, "docs": docs}
+    _CACHE.write_text(json.dumps(payload))
+    return payload
 
 
-def _load() -> list[dict[str, Any]]:
+def _load() -> dict[str, Any]:
     if _CACHE.exists():
-        return json.loads(_CACHE.read_text())
+        payload = json.loads(_CACHE.read_text())
+        if isinstance(payload, dict) and "docs" in payload:
+            return payload
     return _build()
 
 
 def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
     """Search every local notebook, model, and script for aligned passages.
 
-    Returns the matching text itself with its source path, so the caller
-    can ground a workflow in what the community actually wrote.
+    Returns the matching text itself with its source path and the
+    index build stamp, so the caller can ground a workflow in what the
+    community actually wrote and knows how fresh that knowledge is.
+    Call corpus_status() to see which sources the index covers.
     """
-    docs = _load()
+    payload = _load()
+    docs = payload["docs"]
+    built = payload.get("built", "unknown")
     n = len(docs)
     df: Counter = Counter()
     tokenized = []
@@ -114,7 +143,7 @@ def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
     out = []
     for s, d in scored[:limit]:
         hit = {"score": round(s, 2), "source": d["source"],
-               "passage": d["text"][:500]}
+               "indexed": built, "passage": d["text"][:500]}
         status = d.get("api_status")
         if status and status not in ("current-dapi", "local-only"):
             hit["warning"] = (
@@ -124,6 +153,42 @@ def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
     return out
 
 
-def reindex() -> dict[str, int]:
-    """Rebuild the index after mirroring new community data."""
-    return {"documents": len(_build())}
+def corpus_status() -> dict[str, Any]:
+    """What the grounding index covers and where it came from: each
+    logical source (UW notebooks, dapi, the ds-workflows book), how it
+    resolved (local checkout, fetched cache, or absent), how many
+    passages it contributes, and when the index was built. An absent
+    source means degraded grounding; say so rather than answering from
+    partial knowledge, and fetch_corpus() can fill the gap live."""
+    from .fetch import LOGICAL_SOURCES, resolve_source
+
+    payload = _load()
+    indexed = payload.get("sources", {})
+    sources = []
+    for spec in LOGICAL_SOURCES:
+        paths = resolve_source(spec)
+        docs = sum(indexed.get(str(p), {}).get("documents", 0)
+                   for p in paths)
+        sources.append({
+            "name": spec["name"],
+            "what": spec["what"],
+            "resolved": [str(p) for p in paths] or None,
+            "via": ("local" if paths and "corpus" not in str(paths[0])
+                    else "fetched-cache" if paths else "absent"),
+            "documents_indexed": docs,
+            "fetch": None if paths else (
+                "fetch_corpus() then reindex()" if spec["github"]
+                else spec["remote"]),
+        })
+    return {
+        "built": payload.get("built", "unknown"),
+        "total_documents": len(payload["docs"]),
+        "sources": sources,
+    }
+
+
+def reindex() -> dict[str, Any]:
+    """Rebuild the index after mirroring new notebooks or references."""
+    payload = _build()
+    return {"documents": len(payload["docs"]), "built": payload["built"],
+            "sources": payload["sources"]}
