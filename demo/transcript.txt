@@ -1,0 +1,85 @@
+
+=== search_snippets('oscillator resonance single job') ===
+[
+  {
+    "id": "oscillator-single-job-v1",
+    "title": "Single-job damped oscillator at resonance (the first-job lifecycle)",
+    "test": "amplification within (9, 11) of 1/(2*xi)=10; last run 10.00000"
+  },
+  {
+    "id": "resonance-pylauncher-sweep-v1",
+    "title": "Resonance curve by PyLauncher sweep, 25 frequencies in one job",
+    "test": "25/25 tasks; points land on closed-form D(r); peak ~10 at r=1"
+  }
+]
+Authentication successful.
+TMS credentials ready: frontera, stampede3, ls6
+
+=== describe_app('python-s3') ===
+{
+  "id": "python-s3",
+  "version": "1.0.0",
+  "execSystemId": "stampede3",
+  "defaults": {
+    "queue": "skx",
+    "nodeCount": 1,
+    "coresPerNode": 48,
+    "maxMinutes": 120
+  },
+  "fileInputs": [
+    {
+      "name": "Input Directory",
+      "inputMode": "REQUIRED"
+    }
+  ]
+}
+Uploading staged files to tapis://designsafe.storage.default/kks32/dapi-staging/tmp4xrkzr2d (Tapis files API)
+Uploaded 1 file(s); staged_dir is tapis://designsafe.storage.default/kks32/dapi-staging/tmp4xrkzr2d
+
+=== stage_inputs(local folder) ===
+{
+  "input_uri": "tapis://designsafe.storage.default/kks32/dapi-staging/tmp4xrkzr2d"
+}
+
+=== build_job_request(...) ===
+{
+  "name": "mcp-demo-oscillator",
+  "appId": "python-s3",
+  "maxMinutes": 15
+}
+
+=== validate_job ===
+{
+  "ok": true,
+  "issues": []
+}
+
+=== estimate_cost ===
+{
+  "estimated_su": 0.25,
+  "basis": "nodeCount x maxMinutes/60 (SUs bill per node-hour; actual cost is capped by real runtime)"
+}
+
+=== submit_job with a fabricated token (must refuse) ===
+{
+  "submitted": false,
+  "error": "approval token missing or does not match this job request; call approve_submission after human review"
+}
+
+--- trust summary shown to the human ---
+snippet: oscillator-single-job-v1  (test: amplification within (9, 11) of 1/(2*xi)=10; last run 10.00000)
+pinned:  {'dapi': '0.6.1', 'app_id': 'python-s3', 'app_version': '1.0.0'}
+cost:    0.25 SU   produces: result.json
+Job submitted successfully. UUID: df94cc0d-3918-4034-a19d-b73a3df59f2d-007
+
+=== submit_job (approved) ===
+{
+  "submitted": true,
+  "uuid": "df94cc0d-3918-4034-a19d-b73a3df59f2d-007"
+}
+  status: PENDING
+  status: STAGING_INPUTS
+  status: STAGING_JOB
+  status: QUEUED
+  status: RUNNING
+  status: RUNNING

@@ -1,0 +1,93 @@
+# Tested snippet corpus. Every entry is an executed, self-checking example
+# from the dapi repository; entries without a passing test are not admitted.
+snippets:
+  - id: oscillator-single-job-v1
+    title: Single-job damped oscillator at resonance (the first-job lifecycle)
+    app_id: python-s3
+    tags: [oscillator, resonance, first-job, tutorial, serial]
+    pinned_versions: {dapi: "0.6.1", app_id: python-s3, app_version: "1.0.0"}
+    inputs_contract:
+      required: [input_dir, allocation]
+      optional: [queue, max_minutes]
+    source: dapi/examples/python/first-dapi-job.ipynb
+    test: "amplification within (9, 11) of 1/(2*xi)=10; last run 10.00000"
+
+  - id: resonance-pylauncher-sweep-v1
+    title: Resonance curve by PyLauncher sweep, 25 frequencies in one job
+    app_id: python-s3
+    tags: [oscillator, resonance, sweep, pylauncher, parameter-study]
+    pinned_versions: {dapi: "0.6.1", app_id: python-s3, app_version: "1.0.0"}
+    inputs_contract:
+      required: [sweep_values, allocation]
+      optional: [cores_per_node, queue]
+    source: dapi/examples/pylauncher/pylauncher_sweep.ipynb
+    test: "25/25 tasks; points land on closed-form D(r); peak ~10 at r=1"
+
+  - id: pm4sand-freefield-v1
+    title: PM4Sand free-field site response with liquefaction plots (UW model)
+    app_id: opensees-s3
+    tags: [opensees, pm4sand, site-response, liquefaction, earthquake, uw]
+    pinned_versions: {dapi: "0.6.1", app_id: opensees-s3, app_version: latest}
+    inputs_contract:
+      required: [input_dir, allocation]
+      optional: [queue, max_minutes]
+    extra_app_args: [{name: "Main Program", arg: "OpenSees"}]
+    source: dapi/examples/opensees/pm4sand/DS_PM4Sand_FreeField_Solution.ipynb
+    test: "12 recorder/table files archived; acc, profile, pwp plots render"
+
+  - id: openseesmp-multimotion-v1
+    title: OpenSeesMP multi-motion free-field analysis, 16-core parallel
+    app_id: opensees-mp-s3
+    tags: [opensees, openseesmp, site-response, parallel, multi-motion]
+    pinned_versions: {dapi: "0.6.1", app_id: opensees-mp-s3, app_version: "3.8.0"}
+    inputs_contract:
+      required: [input_dir, allocation]
+      optional: [node_count, cores_per_node]
+    source: dapi/examples/opensees/OpenSeesMP-dapi.ipynb
+    test: "Profile*_acc*.out non-empty; response spectra render"
+
+  - id: opensees-ml-dag-v1
+    title: OpenSees sweep feeding a training job, server-side DAG workflow
+    app_id: python-s3
+    tags: [workflow, dag, sweep, machine-learning, opensees, pipeline]
+    pinned_versions: {dapi: "0.6.1", app_id: python-s3, app_version: "1.0.0"}
+    inputs_contract:
+      required: [staged_inputs, allocation]
+      optional: []
+    source: dapi/examples/opensees_ml/DS_OpenSees_ML_Workflow_DAG.ipynb
+    test: "pipeline completed; regression recovers coef [0.5, 1.5, -0.5], R2=1.0"
+
+  - id: pi-fanout-workflow-v1
+    title: Parallel fan-out/fan-in workflow, three shards and an aggregator
+    app_id: python-s3
+    tags: [workflow, dag, parallel, fan-in, monte-carlo]
+    pinned_versions: {dapi: "0.6.1", app_id: python-s3, app_version: "1.0.0"}
+    inputs_contract:
+      required: [allocation]
+      optional: []
+    source: dapi/examples/workflows/pi_fanout/DS_Pi_Fanout_Workflow.ipynb
+    test: "pipeline completed; pi within 5e-3 of 3.141593; last run 3.14096"
+
+  - id: quofem-sensitivity-v1
+    title: quoFEM global sensitivity analysis over an OpenSees model
+    app_id: simcenter-uq-stampede3
+    tags: [quofem, uq, sensitivity, calibration, simcenter, opensees]
+    pinned_versions: {dapi: "0.6.1", app_id: simcenter-uq-stampede3, app_version: latest}
+    inputs_contract:
+      required: [input_dir, allocation]
+      optional: [bundle]
+    source: dapi/examples/quoFEM-sensitivity/quoFEM-sensitivity-dapi.ipynb
+    test: "Sobol indices produced for all random variables; dakotaTab.out archived"
+
+# Candidates: discovered in community data, not yet executed by the corpus
+# test harness, therefore not retrievable by search_snippets. Admitting one
+# means running it, adding the self-check, and moving it under `snippets`.
+candidates:
+  - id: quofem-bayesian-calibration-uw
+    title: Bayesian calibration of a liquefaction model through quoFEM (UW)
+    source: community_data/University_of_Washington/quoFEM-Example1-TAPISV3/BayesianCalibration/quoFEM-Bayesian-dapi.ipynb
+    note: the OpenSees-calibration vertical; papers beside it in the folder
+  - id: laterally-loaded-pile-uw
+    source: community_data/University_of_Washington/LateralLoadPile
+  - id: freefield-effective-uw
+    source: community_data/University_of_Washington/freeFieldEffectiveJupyter
