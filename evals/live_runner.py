@@ -49,7 +49,7 @@ CASES = {
         "input_dir": "../dapi/examples/quoFEM-sensitivity/DS_input",
         "files": {}, "max_minutes": 30, "queue": "skx-dev",
         "extra": "cores_per_node=48, memory_mb=128000,",
-        "assert_file": "dakotaTab.out",
+        "assert_file": "results.zip",  # dakotaTab.out lives inside it
         "snippet": "quofem-sensitivity-v1",
     },
 }
