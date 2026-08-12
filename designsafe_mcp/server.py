@@ -6,7 +6,7 @@ Register in an MCP host (Claude Code/Desktop, jupyter-ai) as a stdio server.
 
 from mcp.server.fastmcp import FastMCP
 
-from . import index, tools
+from . import index, matrix, tools
 
 mcp = FastMCP(
     "designsafe",
@@ -25,6 +25,8 @@ for fn in (
     tools.search_snippets,
     index.search_community,
     index.reindex,
+    matrix.opensees_matrix,
+    matrix.eval_cases,
     tools.describe_app,
     tools.stage_inputs,
     tools.build_job_request,
