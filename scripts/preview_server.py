@@ -81,9 +81,10 @@ def main() -> None:
             if t is None:
                 continue
             desc = (t.description or "").strip().split("\n\n")[0]
-            schema = json.dumps(
-                getattr(t, "inputSchema", {}).get("properties", {}),
-                indent=1)
+            raw = (getattr(t, "input_schema", None)
+                   or getattr(t, "inputSchema", None) or {})
+            props = raw.get("properties", {}) if isinstance(raw, dict) else {}
+            schema = json.dumps(props, indent=1) if props else "(no arguments)"
             items += (
                 f"<details><summary><code>{esc(n)}</code> "
                 f"<span class='d'>{esc(desc[:160])}</span></summary>"
