@@ -30,7 +30,20 @@ def _infer(request: str) -> dict[str, Any]:
     facts: dict[str, Any] = {
         "model_language": None, "parallelism": None, "n_cases": None,
         "uq_or_calibration": None, "has_allocation": None, "pipeline": None,
+        "named_variant": None,
     }
+    # A request that names the variant or app outright has already
+    # decided; record it so the matrix walk can honor the name.
+    for pattern, variant in (
+        (r"opensees[- ]?mp\b|opensees-mp-s3", "mp"),
+        (r"opensees[- ]?sp\b", "sp"),
+        (r"opensees[- ]?express", "express"),
+        (r"openseespy|python-s3", "py"),
+        (r"quofem|simcenter-uq", "quofem"),
+    ):
+        if re.search(pattern, r):
+            facts["named_variant"] = variant
+            break
     if re.search(r"openseespy|\.py\b|python model", r):
         facts["model_language"] = "python"
     elif re.search(r"\.tcl\b|tcl", r):
@@ -94,6 +107,32 @@ def plan_simulation(
     open_questions: list[str] = []
     path: list[str] = []
 
+    # Fork 0: the request names the variant; the name is the decision.
+    named = inferred.get("named_variant")
+    if named:
+        path.append(f"request names the variant -> {named}")
+        if named == "mp":
+            return _plan("OpenSeesMP", "opensees-mp-s3",
+                         "openseesmp multi-motion parallel", facts, path, [])
+        if named == "sp":
+            plan = _plan("OpenSeesSP", "opensees-s3",
+                         "pm4sand site response opensees", facts, path, [])
+            plan["decision"]["extra_app_args"] = [
+                {"name": "Main Program", "arg": "OpenSeesSP"}]
+            return plan
+        if named == "express":
+            return _plan("OpenSeesEXPRESS", "opensees-express",
+                         "pm4sand site response", facts, path, [])
+        if named == "py":
+            query = ("resonance pylauncher sweep"
+                     if facts["parallelism"] == "many-independent-cases"
+                     else "oscillator single job first-job")
+            return _plan("OpenSeesPy at scale", "python-s3", query,
+                         facts, path, [])
+        if named == "quofem":
+            return _plan("quoFEM over OpenSees", "simcenter-uq-stampede3",
+                         "quofem sensitivity calibration", facts, path, [])
+
     # Fork 1: UQ wraps everything else; quoFEM drives the model as its solver.
     if facts["uq_or_calibration"]:
         path.append("UQ/calibration wraps the model -> quoFEM")
@@ -150,14 +189,26 @@ def plan_simulation(
             plan["decision"]["extra_app_args"] = [{"name": "Main Program", "arg": "OpenSees"}]
             return plan
 
-    # Not enough facts for a decision; return the questions, never a guess.
+    # Not enough facts for a decision; return the questions, never a
+    # guess. Attach corpus matches: when the request describes one of
+    # the corpus's own tested examples, the matching snippet's app
+    # stands in for the missing facts; when it is the user's own model,
+    # the questions stand.
+    matches = search_snippets(request)[:2]
     return {
         "decision": None,
         "facts": facts,
         "open_questions": open_questions,
         "matrix_path": path,
+        "corpus_matches": [
+            {"id": m["id"], "app_id": m["app_id"], "title": m["title"],
+             "source": m["source"]} for m in matches
+        ],
         "note": "Ask the user the open questions, then call plan_simulation "
-        "again with the answers. Do not pick an app without the matrix.",
+        "again with the answers. Exception: if the request describes a "
+        "tested corpus example (see corpus_matches), use that snippet's "
+        "app. Do not pick an app for the user's own model without the "
+        "matrix.",
     }
 
 

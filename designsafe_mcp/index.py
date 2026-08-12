@@ -64,8 +64,12 @@ def _build() -> list[dict[str, Any]]:
                 continue
             rel = str(p.relative_to(ROOT.parent))
             if p.suffix == ".ipynb":
+                from .audit import classify, code_of
+
+                status = classify(code_of(p))
                 for i, passage in enumerate(_passages_from_notebook(p)):
-                    docs.append({"source": rel, "cell": i, "text": passage})
+                    docs.append({"source": rel, "cell": i, "text": passage,
+                                 "api_status": status})
             elif p.suffix == ".pdf":
                 for i, passage in enumerate(_passages_from_pdf(p)):
                     docs.append({"source": f"{rel}#page{i + 1}", "cell": i,
@@ -107,10 +111,17 @@ def search_community(query: str, limit: int = 8) -> list[dict[str, Any]]:
         if s > 0:
             scored.append((s, d))
     scored.sort(key=lambda x: -x[0])
-    return [
-        {"score": round(s, 2), "source": d["source"], "passage": d["text"][:500]}
-        for s, d in scored[:limit]
-    ]
+    out = []
+    for s, d in scored[:limit]:
+        hit = {"score": round(s, 2), "source": d["source"],
+               "passage": d["text"][:500]}
+        status = d.get("api_status")
+        if status and status not in ("current-dapi", "local-only"):
+            hit["warning"] = (
+                f"stale API surface ({status}); do not copy its "
+                "orchestration code, use the current dapi equivalent")
+        out.append(hit)
+    return out
 
 
 def reindex() -> dict[str, int]:

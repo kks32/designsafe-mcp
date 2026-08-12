@@ -29,7 +29,11 @@ import yaml
 ROOT = Path(__file__).parent.parent
 sys.path.insert(0, str(ROOT))
 
-CASES = yaml.safe_load((Path(__file__).parent / "cases.yaml").read_text())["cases"]
+def load_cases(name: str) -> list:
+    return yaml.safe_load((Path(__file__).parent / name).read_text())["cases"]
+
+
+CASES = load_cases("cases.yaml")
 
 AGENT_PROMPT = """You are connected to the DesignSafe MCP server (tools prefixed
 mcp__designsafe__). If those tools are deferred in your environment, load them
@@ -44,7 +48,11 @@ details like allocation names, file paths, or script names must not
 stop the app decision; pick placeholder values and list the open items.
 Facts that change WHICH app fits (model language, parallel structure,
 UQ wrapping) are not configuration; when plan_simulation reports those
-as open questions, the app is undetermined.
+as open questions, the app is undetermined, with one exception: if the
+request describes a tested corpus example (plan_simulation's
+corpus_matches or search_snippets identifies the notebook it is
+describing), that snippet's app decides. For a user's own model,
+unanswered app-determining questions still mean ask.
 
 End your reply with exactly one line:
 DECISION: <app_id>        if the request determines a DesignSafe app
@@ -156,10 +164,12 @@ def run_planner_mode() -> list[dict[str, Any]]:
 
     rows = []
     for case in CASES:
+        expect = case["expect"]
+        if expect.get("refuse_submit"):
+            continue  # tests the submission gate; planner mode never submits
         p = plan_simulation(case["request"])
         d = p["decision"]
-        expect = case["expect"]
-        if expect.get("ask") or expect.get("refuse_submit"):
+        if expect.get("ask"):
             ok = d is None or bool(p["open_questions"])
             got = "ask" if d is None else d["app_id"]
         elif expect.get("workflow"):
@@ -201,8 +211,13 @@ def main() -> None:
     ap.add_argument("--trials", type=int, default=1)
     ap.add_argument("--cases", default="", help="comma-separated case ids")
     ap.add_argument("--parallel", type=int, default=4)
+    ap.add_argument("--cases-file", default="",
+                    help="alternate cases yaml, e.g. cases-notebooks.yaml")
     args = ap.parse_args()
 
+    global CASES
+    if args.cases_file:
+        CASES = load_cases(args.cases_file)
     picked = [c for c in CASES
               if not args.cases or c["id"] in args.cases.split(",")]
     rows: list[dict[str, Any]] = []

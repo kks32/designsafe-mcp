@@ -1,0 +1,22 @@
+{
+  "manifest_version": "1",
+  "created": "2026-08-12T06:21:38-0500",
+  "request": "Run an OpenSees Tcl parameter sweep, then train a regression on the archived results. It must run hands-off overnight as one pipeline.",
+  "snippet_ids": [
+    "opensees-ml-dag-v1"
+  ],
+  "pinned": {
+    "dapi": "0.6.1",
+    "app_id": null,
+    "app_version": "latest"
+  },
+  "job": {
+    "uuid": "NOT-SUBMITTED-PENDING-HUMAN-APPROVAL",
+    "name": null,
+    "nodeCount": null,
+    "coresPerNode": null,
+    "max_minutes": null,
+    "inputs": []
+  },
+  "estimated_su": 9.0
+}
