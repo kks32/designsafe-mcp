@@ -11,11 +11,18 @@ into trustworthy workflows. Orchestration comes from a tested snippet corpus
 (executed, self-checking, version-pinned examples), never from a model's
 recall of the API.
 
+`ARCHITECTURE.md` records the full design: the layer stack, why decisions
+live in tools rather than in the model, deployment topologies, and the
+evaluation methodology.
+
 ## Tools
 
 | Action | Tool |
 |---|---|
+| Decide how to run it | `plan_simulation(request, facts...)` walks the OpenSees decision matrix |
+| See the matrix itself | `opensees_matrix()`; the deck's slide ships as an MCP resource |
 | Find a tested workflow | `search_snippets(query)` |
+| Search the corpus | `search_community(query)` over UW community data, dapi examples, the ds-workflows book |
 | Ground in the real app interface | `describe_app(app_id)` |
 | Move data | `stage_inputs(local_dir)` |
 | Construct the experiment | `build_job_request(...)`, `build_workflow_preview(...)` |
@@ -27,11 +34,28 @@ recall of the API.
 ## Run
 
 ```
-pip install -e .
-python -m designsafe_mcp.server        # stdio MCP server
-python demo/demo_first_workflow.py     # agent-shaped walkthrough with a live job
+uv venv .venv && uv pip install -p .venv/bin/python -e .
+.venv/bin/python -m designsafe_mcp.server   # stdio MCP server
 ```
+
+Register it once for Claude Code with
+`claude mcp add designsafe -- $PWD/.venv/bin/python -m designsafe_mcp.server`,
+or add the same command to `.jupyter/mcp_settings.json` for jupyter-ai.
+Auth rides on dapi's environment; nothing is stored here.
 
 `demo/transcript.txt` holds an executed transcript: discovery, grounding,
 staging, validation, cost, a refused unapproved submission, the approved run,
 results, the manifest, and a compiled two-stage DAG preview.
+
+## Evals
+
+```
+.venv/bin/python evals/runner.py --mode planner                       # deterministic floor
+.venv/bin/python evals/runner.py --mode agent --models haiku,sonnet --trials 3
+```
+
+Golden cases in `evals/cases.yaml` map natural-language requests to the
+expected decision; agent mode drives real models against the server in
+`DESIGNSAFE_MCP_MOCK=1` mode (no Tapis calls, no SUs) and scores each
+trace on decision, grounding, and the approval gate. Pass rate per case
+per model is the ability metric.
