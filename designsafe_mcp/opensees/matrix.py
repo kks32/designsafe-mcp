@@ -8,10 +8,10 @@ used. This module only loads and serves it.
 
 from typing import Any
 
-from .knowledge import load
+from ..knowledge import load
 
-VARIANTS: list[dict[str, Any]] = load("opensees_matrix")["variants"]
-PLATFORM_MATRIX: list[dict[str, Any]] = load("opensees_matrix")["platform_matrix"]
+VARIANTS: list[dict[str, Any]] = load("opensees/matrix")["variants"]
+PLATFORM_MATRIX: list[dict[str, Any]] = load("opensees/matrix")["platform_matrix"]
 
 
 def opensees_matrix() -> dict[str, Any]:
@@ -21,4 +21,4 @@ def opensees_matrix() -> dict[str, Any]:
     scope x platform x interface matrix with its legend, and the path of
     the original slide image for display to the user.
     """
-    return dict(load("opensees_matrix"))
+    return dict(load("opensees/matrix"))

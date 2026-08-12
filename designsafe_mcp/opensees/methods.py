@@ -9,10 +9,10 @@ its execution status stated rather than implied.
 
 from typing import Any
 
-from .knowledge import load
-from .tools import search_snippets
+from ..knowledge import load
+from ..tools import search_snippets
 
-CALIBRATION_OPTIONS: list[dict[str, Any]] = load("calibration_methods")["options"]
+CALIBRATION_OPTIONS: list[dict[str, Any]] = load("opensees/calibration_methods")["options"]
 
 
 def calibration_options() -> list[dict[str, Any]]:

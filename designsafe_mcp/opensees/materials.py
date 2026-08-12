@@ -10,7 +10,7 @@ from typing import Any
 
 import yaml
 
-_DIR = Path(__file__).parent / "knowledge" / "materials"
+_DIR = Path(__file__).parent.parent / "knowledge" / "opensees" / "materials"
 
 
 def _models() -> dict[str, dict[str, Any]]:

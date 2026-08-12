@@ -11,18 +11,8 @@ try:  # mcp >= 2.0
 except ImportError:  # mcp 1.x
     from mcp.server.fastmcp import FastMCP  # type: ignore[assignment,no-redef]
 
-from . import (
-    bridge,
-    capabilities,
-    fetch,
-    index,
-    materials,
-    matrix,
-    methods,
-    planner,
-    skills,
-    tools,
-)
+from . import bridge, capabilities, fetch, index, skills, tools
+from .opensees import materials, matrix, methods, planner
 
 _ASSETS = Path(__file__).parent.parent / "assets"
 

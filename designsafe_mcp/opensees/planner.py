@@ -11,7 +11,7 @@ the matrix does, so the same facts always produce the same plan.
 import re
 from typing import Any
 
-from .tools import search_snippets
+from ..tools import search_snippets
 
 _SEQUENCE = [
     "describe_app", "stage_inputs", "build_job_request", "validate_job",

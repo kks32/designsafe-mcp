@@ -9,8 +9,9 @@ import pytest
 
 os.environ["DESIGNSAFE_MCP_MOCK"] = "1"
 
-from designsafe_mcp import matrix, tools
-from designsafe_mcp.planner import plan_simulation
+from designsafe_mcp import tools
+from designsafe_mcp.opensees import matrix
+from designsafe_mcp.opensees.planner import plan_simulation
 
 
 def test_matrix_variants_map_to_known_apps():
@@ -111,7 +112,7 @@ def test_workflow_preview_compiles_in_mock_mode():
 
 
 def test_material_knowledge_cites_the_manual():
-    from designsafe_mcp.materials import describe_material
+    from designsafe_mcp.opensees.materials import describe_material
 
     m = describe_material("PM4Sand")
     assert [p["name"] for p in m["primary_parameters"]] == ["Dr", "G0", "hpo"]
@@ -121,7 +122,7 @@ def test_material_knowledge_cites_the_manual():
 
 
 def test_calibration_planner_forks():
-    from designsafe_mcp.methods import plan_calibration
+    from designsafe_mcp.opensees.methods import plan_calibration
 
     bayes = plan_calibration("x", n_uncertain_parameters=3,
                              uncertainty_required=True, quofem_wrappable=True)
@@ -138,7 +139,7 @@ def test_calibration_planner_forks():
 
 
 def test_calibration_options_state_status():
-    from designsafe_mcp.methods import calibration_options
+    from designsafe_mcp.opensees.methods import calibration_options
 
     for opt in calibration_options():
         assert opt["status"], opt["method"]

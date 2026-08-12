@@ -170,7 +170,7 @@ def score(case: dict[str, Any], decision: str | None,
 
 def run_planner_mode() -> list[dict[str, Any]]:
     """Deterministic floor: plan_simulation alone against every case."""
-    from designsafe_mcp.planner import plan_simulation
+    from designsafe_mcp.opensees.planner import plan_simulation
 
     rows = []
     for case in CASES:

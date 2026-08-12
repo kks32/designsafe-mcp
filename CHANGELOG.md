@@ -2,6 +2,7 @@
 
 ## Unreleased
 
+- OpenSees domain package: matrix, planners, calibration methods, and material knowledge move under designsafe_mcp/opensees/ with knowledge/opensees/ data; the top level is generic substrate only, and a new domain gets a sibling package of the same shape.
 - Knowledge extracted from code into designsafe_mcp/knowledge/ YAML
   (decision matrix, capabilities, calibration methods, PM4Sand,
   API-surface definitions incl. what current-dapi vs old-dapi means);
